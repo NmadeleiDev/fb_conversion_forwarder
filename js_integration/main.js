@@ -1,4 +1,4 @@
-function xFbConvSend(event_name, emails=[], phones=[], genders=[], last_names=[], first_names=[], cities=[], countries=[], dates_of_birth=[]) {
+function xFbConvSend(event_name, params) {
     const it = 'ACCOUNT_TOKEN_PLACEHOLDER'
 
     try {
@@ -16,21 +16,19 @@ function xFbConvSend(event_name, emails=[], phones=[], genders=[], last_names=[]
             auth_token: it,
             event_name: event_name, 
             event_time: Math.floor(Number(new Date()) / 1000),
-            emails: emails,
-            phones: phones,
-            genders: genders,
-            last_names: last_names,
-            first_names: first_names,
-            dates_of_birth: dates_of_birth,
-            cities: cities,
-            countries: countries,
-            fbc: undefined,
-            fbp: undefined
+            emails: params.emails || [],
+            phones: params.phones || [],
+            genders: params.genders || [],
+            last_names: params.last_names || [],
+            first_names: params.first_names || [],
+            dates_of_birth: params.dates_of_birth || [],
+            cities: params.cities || [],
+            countries: params.countries || [],
+            fbc: fbc ? fbc : undefined,
+            fbp: fbp ? fbp : undefined
         }
-        if (fbc) body.fbc = fbc
-        if (fbp) body.fbp = fbp
     
-        fetch("http://localhost:8092/api/v1/fw/c", {
+        fetch("https://fb-forwarder.ga/api/v1/fw/c", {
             method: 'POST',
             mode: 'cors',
             headers: {
