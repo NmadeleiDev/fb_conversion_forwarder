@@ -1,7 +1,10 @@
+from hashlib import sha256
 import os
 import logging
 from typing import List
 import psycopg2
+
+from ..model.account import AccountModel, AccountWithPasswdModel, AccountWithTokenModel
 from ..model.bm import BusinessManagerModel, NewBusinessManagerModel, UpdateBusinessManagerModel
 from .table_queries import *
 from ..model.server_exception import ServerException
@@ -27,11 +30,13 @@ class DbManager():
         logging.debug("Connected to db")
 
         self.bm_table_ref = f'{schema_name}.{business_managers_table}'
+        self.account_table_ref = f'{schema_name}.{auth_table}'
 
     def create_tables(self, cursor=None):
         with self.conn.cursor() as cursor:
             cursor.execute(schema_create_query)
             cursor.execute(BMs_table_query)
+            cursor.execute(auth_table_query)
 
 
     #CRUD BM
@@ -91,4 +96,53 @@ class DbManager():
                 raise ServerException('forwarder_secret incorrect', http_code=status.HTTP_404_NOT_FOUND)
 
             return BusinessManagerModel(name = '', access_token=access_token, forwarder_secret=true_secret, pixel_id=pixel_id, id=bm_id)
+
+
+    # Auth accounts
+    def hash_password(self, val: str) -> str:
+        return sha256(val.encode('utf-8')).hexdigest()
+
+    def create_account(self, data: AccountWithPasswdModel):
+        hashed_ent = AccountWithPasswdModel(email=data.email, password=self.hash_password(data.password))
+
+        query = f"""INSERT INTO {self.account_table_ref} (email, password) VALUES (%s, %s)"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (hashed_ent.email, hashed_ent.password))
+
+    def update_account_token(self, data: AccountWithTokenModel):
+        query = f"""UPDATE {self.account_table_ref} SET token = %s WHERE email = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (data.token, data.email))
+
+    def auth_account_password(self, data: AccountWithPasswdModel) -> bool:
+        hashed_ent = AccountWithPasswdModel(email=data.email, password=self.hash_password(data.password))
+
+        query = f"""SELECT password FROM {self.account_table_ref} WHERE email = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (hashed_ent.email,))
+            passwd = curs.fetchone()[0]
+            if passwd == hashed_ent.password:
+                return True
+            else:
+                logging.debug(f"Password incorrect.\nOriginal: {passwd}\nPasswd: {hashed_ent.password}")
+                return False
+
+    def auth_account_token(self, data: AccountWithTokenModel) -> bool:
+        query = f"""SELECT token FROM {self.account_table_ref} WHERE email = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (data.email,))
+            token = curs.fetchone()[0]
+            return token == data.token
+
+    def delete_account(self, email: str):
+        query = f"""DELETE FROM {self.account_table_ref} WHERE email = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (email,))
+
+
     

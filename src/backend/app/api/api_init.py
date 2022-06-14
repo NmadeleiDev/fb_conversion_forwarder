@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from ..model.server_exception import ServerException
 from ..model.err_msg import ErrorMsgModel
 
-from .routers import admin, forwarder
+from .routers import admin, forwarder, login
 
 def get_app() -> FastAPI:
     app = FastAPI(
@@ -25,6 +25,7 @@ def get_app() -> FastAPI:
 
     app.include_router(router=admin.router)
     app.include_router(router=forwarder.router)
+    app.include_router(router=login.router)
 
     origins = [
         "*",

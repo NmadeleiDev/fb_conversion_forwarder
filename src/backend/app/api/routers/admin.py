@@ -1,9 +1,9 @@
-from io import StringIO
-import logging
 from typing import List
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, Request, Response
 from fastapi.responses import PlainTextResponse
-from .helpers.auth import CookieAuthMiddlewareRoute
+
+from ...model.account import AccountModel, AccountWithPasswdModel
+from .helpers.auth import CookieAuthMiddlewareRoute, remove_auth_cookie_from_response
 
 from ...db.manager import DbManager
 
@@ -30,6 +30,19 @@ async def update_bm(body: UpdateBusinessManagerModel):
 @router.delete('/bm', status_code=status.HTTP_200_OK)
 async def delete_bm(bm_id: str):
     DbManager().delete_bm(bm_id)
+
+@router.get('/account', status_code=status.HTTP_200_OK)
+async def is_logged_to_account():
+    pass
+
+@router.post('/account', status_code=status.HTTP_200_OK)
+async def create_account(body: AccountWithPasswdModel):
+    DbManager().create_account(body)
+
+@router.delete('/account', status_code=status.HTTP_200_OK)
+async def delete_this_account(request: Request, response: Response):
+    DbManager().delete_account(request.state.email)
+    remove_auth_cookie_from_response(response)
 
 @router.get('/pixel', status_code=status.HTTP_200_OK, response_class=PlainTextResponse)
 async def get_forwarder_pixel_script(bm_id: str):

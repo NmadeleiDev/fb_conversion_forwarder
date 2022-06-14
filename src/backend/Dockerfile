@@ -1,7 +1,7 @@
 FROM python:3.10.2
 
 RUN python -m pip install --upgrade pip
-RUN apt update && apt install -y uvicorn && apt -y install libpq-dev gcc && pip install fastapi[all] psycopg2-binary facebook-business
+RUN apt update && apt install -y uvicorn && apt -y install libpq-dev gcc && pip install fastapi[all] psycopg2-binary facebook-business pyjwt cryptography
 
 COPY . /application
 WORKDIR /application

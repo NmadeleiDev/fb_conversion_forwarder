@@ -11,7 +11,6 @@ from ...db.manager import DbManager
 router = APIRouter(
     prefix="/fw",
     tags=["Conversion forwarding"],
-    route_class=CookieAuthMiddlewareRoute
 )
 
 db = DbManager()
