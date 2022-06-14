@@ -19,7 +19,7 @@
 
         <v-card-text class="mt-5">
           <div class="d-flex flex-row flex-fill">
-            <v-text-field label="Account name" v-model="account.name"></v-text-field>
+            <v-text-field outlined label="Account name" v-model="account.name"></v-text-field>
 
             <v-btn
                 color="primary"
