@@ -5,31 +5,33 @@
         width="700"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text color="error" v-bind="attrs"
+        <v-btn text color="primary" v-bind="attrs"
                v-on="on">
           <v-icon
-              >mdi-delete</v-icon>
+              >mdi-cog-outline</v-icon>
         </v-btn>
       </template>
 
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">
-          Delete account '{{account.name}}'
+          Edit BM '{{bm.name}}'
         </v-card-title>
 
         <v-card-text class="mt-5">
-          Are you sure that you want to delete account '{{account.name}}'?
+          <v-text-field label="Account name" v-model="bm.name"></v-text-field>
+          <v-text-field label="Business manager access token" v-model="bm.access_token"></v-text-field>
+          <v-text-field label="Facebook pixel ID" v-model="bm.pixel_id"></v-text-field>
         </v-card-text>
 
         <v-divider></v-divider>
 
         <v-card-actions>
           <v-btn
-              color="error"
+              color="primary"
               text
-              @click="deleteAccount"
+              @click="saveBm"
           >
-            Delete account
+            Save
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -49,10 +51,10 @@
 import axios from "axios";
 
 export default {
-  name: "DeleteAccountDialog",
+  name: "EditBmDialog",
 
   props: {
-    account: Object
+    bm: Object
   },
 
   data: () => ({
@@ -60,8 +62,15 @@ export default {
   }),
 
   methods: {
-    deleteAccount() {
-      axios.delete(`/api/v1/admin/ac?ac_id=${this.account.id}`).then((x) => {
+    saveBm() {
+      axios.put('/api/v1/admin/bm',
+          {
+            id: parseInt(this.bm.id),
+            ad_container_id: parseInt(this.bm.ad_container_id),
+            name: this.bm.name,
+            access_token: this.bm.access_token,
+            pixel_id: this.bm.pixel_id,
+          }).then((x) => {
         this.dialog = false
         this.emitChange()
       })

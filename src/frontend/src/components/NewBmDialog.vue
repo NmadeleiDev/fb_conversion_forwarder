@@ -5,23 +5,22 @@
         width="700"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn
-            text
-            v-bind="attrs"
-            v-on="on">
-          <span class="mr-2">Create account</span>
-          <v-icon>mdi-account-plus</v-icon>
+        <v-btn text color="primary"
+               v-bind="attrs"
+               v-on="on">
+          Add BM
         </v-btn>
       </template>
 
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">
-          Create New Account
+          Add new BM record
         </v-card-title>
 
         <v-card-text class="mt-5">
-          <v-text-field label="Email" v-model="email"></v-text-field>
-          <v-text-field label="Password" v-model="password"></v-text-field>
+          <v-text-field label="Local BM name" v-model="name"></v-text-field>
+          <v-text-field label="Business manager access token" v-model="accessToken"></v-text-field>
+          <v-text-field label="Facebook pixel ID" v-model="pixelId"></v-text-field>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -31,9 +30,9 @@
               color="primary"
               text
               depressed
-              @click="sendCreateReq"
+              @click="saveBm"
           >
-            Create
+            Add
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -53,25 +52,36 @@
 import axios from "axios";
 
 export default {
-  name: "CreateAccDialog",
+  name: "NewBmDialog",
+
+  props: {
+    acid: String
+  },
 
   data: () => ({
-    email: '',
-    password: '',
+    name: '',
+    accessToken: '',
+    pixelId: '',
 
     dialog: false
   }),
 
   methods: {
-    sendCreateReq() {
-      axios.post('/api/v1/admin/account',
-          {
-            email: this.email,
-            password: this.password,
+    saveBm() {
+      axios.post('/api/v1/admin/bm',
+        {
+            name: this.name,
+            ad_container_id: this.acid,
+            access_token: this.accessToken,
+            pixel_id: this.pixelId,
           })
           .then((x) => {
             this.dialog = false
-          }).catch(x => console.log(x))
+            this.emitChange()
+          })
+    },
+    emitChange() {
+      this.$emit('data-change')
     }
   }
 }

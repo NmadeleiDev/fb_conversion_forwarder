@@ -19,8 +19,6 @@
 
         <v-card-text class="mt-5">
           <v-text-field label="Account name" v-model="name"></v-text-field>
-          <v-text-field label="Business manager access token" v-model="accessToken"></v-text-field>
-          <v-text-field label="Facebook pixel ID" v-model="pixelId"></v-text-field>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -32,7 +30,7 @@
               depressed
               @click="saveAccount"
           >
-            Save
+            Create
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -56,19 +54,15 @@ export default {
 
   data: () => ({
     name: '',
-    accessToken: '',
-    pixelId: '',
 
     dialog: false
   }),
 
   methods: {
     saveAccount() {
-      axios.post('/api/v1/admin/bm',
+      axios.post('/api/v1/admin/ac',
         {
             name: this.name,
-            access_token: this.accessToken,
-            pixel_id: this.pixelId,
           })
           .then((x) => {
             this.dialog = false

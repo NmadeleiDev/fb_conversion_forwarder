@@ -5,28 +5,32 @@
         width="700"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text v-bind="attrs"
+        <v-btn text color="error" v-bind="attrs"
                v-on="on">
-        <v-icon color="grey lighten-1"
-                  >mdi-information</v-icon>
+          <v-icon
+              >mdi-delete</v-icon>
         </v-btn>
       </template>
 
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">
-          Account {{bm.name}}
+          Delete BM '{{bm.name}}'
         </v-card-title>
 
         <v-card-text class="mt-5">
-          Here is forwarder pixel for account '{{bm.name}}'. Give it to the advertiser to add to the website.
+          Are you sure that you want to delete Bm '{{bm.name}}'?
         </v-card-text>
-
-        <v-textarea :value="pixel" class="ma-4" label="Account pixel">
-        </v-textarea>
 
         <v-divider></v-divider>
 
         <v-card-actions>
+          <v-btn
+              color="error"
+              text
+              @click="deleteBm"
+          >
+            Delete BM
+          </v-btn>
           <v-spacer></v-spacer>
           <v-btn
               color="secondary"
@@ -45,22 +49,27 @@
 import axios from "axios";
 
 export default {
-  name: "BmInfoDialog",
+  name: "DeleteBmDialog",
 
   props: {
     bm: Object
   },
 
   data: () => ({
-    pixel: '',
     dialog: false
   }),
 
-  created() {
-    axios.get(`/api/v1/admin/pixel?bm_id=${this.bm.id}`).then(resp => {
-      this.pixel = resp.data
-    })
-  },
+  methods: {
+    deleteBm() {
+      axios.delete(`/api/v1/admin/bm?bm_id=${this.bm.id}`).then((x) => {
+        this.dialog = false
+        this.emitChange()
+      })
+    },
+    emitChange() {
+      this.$emit('data-change')
+    }
+  }
 }
 </script>
 

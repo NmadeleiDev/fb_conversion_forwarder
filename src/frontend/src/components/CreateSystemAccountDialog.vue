@@ -5,31 +5,35 @@
         width="700"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text color="error" v-bind="attrs"
-               v-on="on">
-          <v-icon
-              >mdi-delete</v-icon>
+        <v-btn
+            text
+            v-bind="attrs"
+            v-on="on">
+          <span class="mr-2">Create account</span>
+          <v-icon>mdi-account-plus</v-icon>
         </v-btn>
       </template>
 
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">
-          Delete account '{{account.name}}'
+          Create New Account
         </v-card-title>
 
         <v-card-text class="mt-5">
-          Are you sure that you want to delete account '{{account.name}}'?
+          <v-text-field label="Email" v-model="email"></v-text-field>
+          <v-text-field label="Password" v-model="password"></v-text-field>
         </v-card-text>
 
         <v-divider></v-divider>
 
         <v-card-actions>
           <v-btn
-              color="error"
+              color="primary"
               text
-              @click="deleteAccount"
+              depressed
+              @click="sendCreateReq"
           >
-            Delete account
+            Create
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn
@@ -49,25 +53,25 @@
 import axios from "axios";
 
 export default {
-  name: "DeleteAccountDialog",
-
-  props: {
-    account: Object
-  },
+  name: "CreateSystemAccountDialog",
 
   data: () => ({
+    email: '',
+    password: '',
+
     dialog: false
   }),
 
   methods: {
-    deleteAccount() {
-      axios.delete(`/api/v1/admin/ac?ac_id=${this.account.id}`).then((x) => {
-        this.dialog = false
-        this.emitChange()
-      })
-    },
-    emitChange() {
-      this.$emit('data-change')
+    sendCreateReq() {
+      axios.post('/api/v1/admin/account',
+          {
+            email: this.email,
+            password: this.password,
+          })
+          .then((x) => {
+            this.dialog = false
+          }).catch(x => console.log(x))
     }
   }
 }

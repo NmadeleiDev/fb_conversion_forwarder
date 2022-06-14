@@ -11,7 +11,7 @@
 
       <v-spacer></v-spacer>
       <LoginDialog></LoginDialog>
-      <CreateAccDialog v-if="isLogged"></CreateAccDialog>
+      <CreateSystemAccountDialog v-if="isLogged"></CreateSystemAccountDialog>
     </v-app-bar>
 
     <v-main>
@@ -25,12 +25,12 @@
           <v-text-field
               filled
               label="Filter accounts"
-              v-model="bmSearchStr"
+              v-model="accSearchStr"
               class="mr-7 ml-7"
           >
           </v-text-field>
           <v-list rounded>
-            <BmItem v-on:data-change="reloadData" v-for="bm in filteredBms" :bm="bm" :key="bm.id"></BmItem>
+            <AccountItem v-on:data-change="reloadData" v-for="ac in filteredAccounts" :account="ac" :key="ac.id"></AccountItem>
           </v-list>
         </v-card>
         <LoginDialog v-else></LoginDialog>
@@ -41,25 +41,25 @@
 
 <script>
 import Vue from 'vue';
-import BmItem from './components/BmItem.vue';
 import axios from "axios";
 import NewAccountDialog from "@/components/NewAccountDialog";
 import LoginDialog from "@/components/LoginDialog";
-import CreateAccDialog from "@/components/CreateAccDialog";
+import CreateSystemAccountDialog from "@/components/CreateSystemAccountDialog";
+import AccountItem from "@/components/AccountItem";
 
 export default Vue.extend({
   name: 'App',
 
   components: {
-    CreateAccDialog,
+    AccountItem,
+    CreateSystemAccountDialog,
     LoginDialog,
     NewAccountDialog,
-    BmItem,
   },
 
   data: () => ({
-    bms: [],
-    bmSearchStr: '',
+    accounts: [],
+    accSearchStr: '',
 
     isLogged: false
   }),
@@ -71,9 +71,9 @@ export default Vue.extend({
 
   methods: {
     reloadData() {
-      while (this.bms.length) {this.bms.pop()}
-      axios.get("/api/v1/admin/bm").then(resp => {
-        resp.data.forEach(x => this.bms.push(x))
+      while (this.accounts.length) {this.accounts.pop()}
+      axios.get("/api/v1/admin/ac").then(resp => {
+        resp.data.forEach(x => this.accounts.push(x))
       })
     },
 
@@ -86,12 +86,12 @@ export default Vue.extend({
     },
   },
   computed: {
-    filteredBms() {
-      if (this.bmSearchStr) {
-        return this.bms.filter(
-            x => x.name.toString().includes(this.bmSearchStr) || x.id.toString().includes(this.bmSearchStr))
+    filteredAccounts() {
+      if (this.accSearchStr) {
+        return this.accounts.filter(
+            x => x.name.toString().includes(this.accSearchStr) || x.id.toString().includes(this.accSearchStr))
       } else {
-        return this.bms
+        return this.accounts
       }
     }
   }

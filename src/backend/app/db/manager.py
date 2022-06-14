@@ -1,11 +1,12 @@
 from hashlib import sha256
 import os
 import logging
-from typing import List
+from typing import List, Union
 import psycopg2
 
 from ..model.account import AccountModel, AccountWithPasswdModel, AccountWithTokenModel
-from ..model.bm import BusinessManagerModel, NewBusinessManagerModel, UpdateBusinessManagerModel
+from ..model.bm import NewBusinessManagerModel, UpdateBusinessManagerModel
+from ..model.advertiser_container import AdvertiserContainerModel, NewAdvertiserContainerModel, UpdateAdvertiserContainerModel
 from .table_queries import *
 from ..model.server_exception import ServerException
 from .utils import generate_random_string
@@ -21,53 +22,82 @@ class DbManager():
         self.user = os.getenv('POSTGRES_USER')
         self.password = os.getenv('POSTGRES_PASSWORD')
 
-        logging.debug("Establishing db connection... {}".format(
-            (self.db_name, self.user, self.password, self.host, self.port)))
         self.conn = psycopg2.connect(
             database=self.db_name, user=self.user, password=self.password, host=self.host, port=self.port)
 
         self.conn.autocommit = True
-        logging.debug("Connected to db")
 
+        self.advertiser_container_table_ref = f'{schema_name}.{advertiser_container_table}'
         self.bm_table_ref = f'{schema_name}.{business_managers_table}'
         self.account_table_ref = f'{schema_name}.{auth_table}'
 
     def create_tables(self, cursor=None):
         with self.conn.cursor() as cursor:
             cursor.execute(schema_create_query)
+            cursor.execute(advertiser_container_table_query)
             cursor.execute(BMs_table_query)
             cursor.execute(auth_table_query)
 
-
-    #CRUD BM
-    def get_bms(self) -> List[BusinessManagerModel]:
-        query = f"""SELECT id, name, forwarder_secret, access_token, pixel_id FROM {self.bm_table_ref}"""
+    #CRUD advertiser_conatiners
+    def get_advertiser_conatiners(self) -> List[AdvertiserContainerModel]:
+        query = f"""SELECT id, name, forwarder_secret FROM {self.advertiser_container_table_ref}"""
 
         with self.conn.cursor() as curs:
             curs.execute(query)
-            return [BusinessManagerModel(
-                id=x[0], 
+            return [AdvertiserContainerModel(
+                id=x[0],
                 name=x[1], 
-                forwarder_secret=x[2],
-                access_token=x[3],
-                pixel_id=x[4]) for x in curs.fetchall()]
+                forwarder_secret=x[2]) for x in curs.fetchall()]
 
-    def get_bm_forwarder_secret(self, bm_id: str) -> str:
-        query = f"""SELECT forwarder_secret FROM {self.bm_table_ref} WHERE id = %s"""
-
-        with self.conn.cursor() as curs:
-            curs.execute(query, (bm_id,))
-            return curs.fetchone()[0]
-
-    def insert_bm(self, bm: NewBusinessManagerModel) -> BusinessManagerModel:
+    def insert_advertiser_conatiner(self, ac: NewAdvertiserContainerModel) -> AdvertiserContainerModel:
         forwarder_secret = generate_random_string(32)
 
-        query = f"""INSERT INTO {self.bm_table_ref} (name, forwarder_secret, access_token, pixel_id) VALUES (%s,%s,%s,%s) RETURNING id"""
+        query = f"""INSERT INTO {self.advertiser_container_table_ref} (name, forwarder_secret) VALUES (%s,%s) RETURNING id"""
 
         with self.conn.cursor() as curs:
-            curs.execute(query, (bm.name, forwarder_secret, bm.access_token, bm.pixel_id))
-            new_id = curs.fetchall()[0][0]
-            return BusinessManagerModel(id=new_id, forwarder_secret=forwarder_secret, **bm.dict())
+            curs.execute(query, (ac.name, forwarder_secret))
+            new_id = curs.fetchone()[0]
+            return AdvertiserContainerModel(id=new_id, forwarder_secret=forwarder_secret, **ac.dict())
+ 
+    def update_advertiser_conatiner(self, ac: UpdateAdvertiserContainerModel):
+        query = f"""UPDATE {self.advertiser_container_table_ref} SET name = %s WHERE id = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (ac.name, ac.id))
+
+    def delete_advertiser_conatiner(self, ac_id: str):
+        query = f"""DELETE FROM {self.advertiser_container_table_ref} WHERE id = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (ac_id, ))
+
+    def get_advertiser_conatiner_forwarder_secret(self, ac_id: str) -> str:
+        query = f"""SELECT forwarder_secret FROM {self.advertiser_container_table_ref} WHERE id = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (ac_id,))
+            return curs.fetchone()[0]
+
+    #CRUD BM
+    def get_bms_for_ad_container(self, ac_id: int) -> List[UpdateBusinessManagerModel]:
+        query = f"""SELECT id, name, access_token, pixel_id FROM {self.bm_table_ref} WHERE ad_container_id = %s"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (ac_id,))
+            return [UpdateBusinessManagerModel(
+                ad_container_id=ac_id,
+                id=x[0],
+                name=x[1], 
+                access_token=x[2],
+                pixel_id=x[3]) for x in curs.fetchall()]
+
+    def insert_bm(self, bm: NewBusinessManagerModel) -> UpdateBusinessManagerModel:
+        query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id) VALUES (%s,%s,%s,%s) RETURNING id"""
+
+        with self.conn.cursor() as curs:
+            curs.execute(query, (bm.name, bm.ad_container_id, bm.access_token, bm.pixel_id))
+            new_id = curs.fetchone()[0]
+            return UpdateBusinessManagerModel(id=new_id, **bm.dict())
 
     def update_bm(self, bm: UpdateBusinessManagerModel):
         query = f"""UPDATE {self.bm_table_ref} SET (name, access_token, pixel_id) = (%s,%s,%s) WHERE id = %s"""
@@ -80,22 +110,6 @@ class DbManager():
 
         with self.conn.cursor() as curs:
             curs.execute(query, (bm_id, ))
-
-    # For forwarding
-    def get_bm_by_id_and_secret(self, bm_id: str, forwarder_secret: str) -> BusinessManagerModel:
-        query = f"""SELECT forwarder_secret, access_token, pixel_id FROM {self.bm_table_ref} WHERE id=%s"""
-
-        with self.conn.cursor() as curs:
-            curs.execute(query, (bm_id,))
-            res = curs.fetchall()
-            if len(res) != 1:
-                raise ServerException('id not found', http_code=status.HTTP_404_NOT_FOUND)
-            true_secret, access_token, pixel_id = res[0]
-
-            if forwarder_secret != true_secret:
-                raise ServerException('forwarder_secret incorrect', http_code=status.HTTP_404_NOT_FOUND)
-
-            return BusinessManagerModel(name = '', access_token=access_token, forwarder_secret=true_secret, pixel_id=pixel_id, id=bm_id)
 
 
     # Auth accounts

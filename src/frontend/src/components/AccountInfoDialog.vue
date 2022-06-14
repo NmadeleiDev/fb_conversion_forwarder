@@ -5,32 +5,28 @@
         width="700"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text color="error" v-bind="attrs"
+        <v-btn text v-bind="attrs"
                v-on="on">
-          <v-icon
-              >mdi-delete</v-icon>
+        <v-icon color="grey lighten-1"
+                  >mdi-information</v-icon>
         </v-btn>
       </template>
 
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">
-          Delete account '{{account.name}}'
+          Account {{account.name}}
         </v-card-title>
 
         <v-card-text class="mt-5">
-          Are you sure that you want to delete account '{{account.name}}'?
+          Here is forwarder pixel for account '{{account.name}}'. Give it to the advertiser to add to the website.
         </v-card-text>
+
+        <v-textarea :value="pixel" class="ma-4" label="Account pixel">
+        </v-textarea>
 
         <v-divider></v-divider>
 
         <v-card-actions>
-          <v-btn
-              color="error"
-              text
-              @click="deleteAccount"
-          >
-            Delete account
-          </v-btn>
           <v-spacer></v-spacer>
           <v-btn
               color="secondary"
@@ -49,27 +45,22 @@
 import axios from "axios";
 
 export default {
-  name: "DeleteAccountDialog",
+  name: "AccountInfoDialog",
 
   props: {
     account: Object
   },
 
   data: () => ({
+    pixel: '',
     dialog: false
   }),
 
-  methods: {
-    deleteAccount() {
-      axios.delete(`/api/v1/admin/ac?ac_id=${this.account.id}`).then((x) => {
-        this.dialog = false
-        this.emitChange()
-      })
-    },
-    emitChange() {
-      this.$emit('data-change')
-    }
-  }
+  created() {
+    axios.get(`/api/v1/admin/pixel?ac_id=${this.account.id}`).then(resp => {
+      this.pixel = resp.data
+    })
+  },
 }
 </script>
 

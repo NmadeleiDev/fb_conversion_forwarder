@@ -1,7 +1,10 @@
 from typing import Union
 from fastapi import APIRouter, FastAPI, Header, Response, Request, status, UploadFile, File
+
+from ...model.err_msg import ErrorMsgModel
 from .helpers.auth import CookieAuthMiddlewareRoute
 import logging
+from fastapi.responses import JSONResponse
 
 from ...model.conversion import SendConversionRequest
 from ...fb import conversions_api
@@ -25,20 +28,25 @@ async def send_conversion_to_fb(
 
     logging.debug(f'Got request to forward: auth_token={body.auth_token}')
     parts = body.auth_token.split('.')
-    internal_id = parts[0]
+    ac_id = parts[0]
     fw_secret = parts[1]
-    bm = db.get_bm_by_id_and_secret(internal_id, fw_secret)
 
-    logging.debug(f'BM auth success for x_internal_id={internal_id}')
+    if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
 
-    conversions_api.send_convesrion(
-        conversion=body, 
-        ip=client_ip, 
-        user_agent=user_agent, 
-        event_source=str(request.base_url),
-        pixel_id=bm.pixel_id, 
-        access_token=bm.access_token
-    )
+    bms = db.get_bms_for_ad_container(ac_id)
+
+    logging.debug(f'ac auth success for ac_id={ac_id}')
+
+    for bm in bms:
+        conversions_api.send_convesrion(
+            conversion=body, 
+            ip=client_ip, 
+            user_agent=user_agent, 
+            event_source=str(request.base_url),
+            pixel_id=bm.pixel_id, 
+            access_token=bm.access_token
+        )
 
 @router.post('/t', status_code=status.HTTP_200_OK)
 async def send_test_conversion_to_fb(
@@ -50,13 +58,22 @@ async def send_test_conversion_to_fb(
     client_ip = str(request.client.host)
 
     parts = auth_token.split('.')
-    internal_id = parts[0]
+    ac_id = parts[0]
     fw_secret = parts[1]
-    bm = db.get_bm_by_id_and_secret(internal_id, fw_secret)
 
-    conversions_api.send_test_conversion(test_event_code,
-        ip=client_ip, 
-        user_agent=user_agent, 
-        event_source=str(request.base_url),
-        pixel_id=bm.pixel_id, access_token=bm.access_token
-    )
+    if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
+
+    bms = db.get_bms_for_ad_container(ac_id)
+
+    logging.debug(f'ac auth success for ac_id={ac_id}')
+
+    for bm in bms:
+        conversions_api.send_test_conversion(
+            test_code=test_event_code,
+            ip=client_ip, 
+            user_agent=user_agent, 
+            event_source=str(request.base_url),
+            pixel_id=bm.pixel_id, 
+            access_token=bm.access_token
+        )
