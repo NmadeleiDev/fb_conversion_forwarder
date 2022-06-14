@@ -24,8 +24,9 @@ function xFbConvSend(event_name, params) {
             dates_of_birth: params.dates_of_birth || [],
             cities: params.cities || [],
             countries: params.countries || [],
+            lead_id: params.lead_id || undefined,
             fbc: fbc ? fbc : undefined,
-            fbp: fbp ? fbp : undefined
+            fbp: fbp ? fbp : undefined,
         }
     
         fetch("https://fb-forwarder.ga/api/v1/fw/c", {
