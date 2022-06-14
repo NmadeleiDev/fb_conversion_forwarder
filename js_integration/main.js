@@ -12,22 +12,13 @@ function xFbConvSend(event_name, params) {
                 fbp = parts[1]
         })
     
-        const body = {
+        const body = Object.assign({
             auth_token: it,
             event_name: event_name, 
             event_time: Math.floor(Number(new Date()) / 1000),
-            emails: params.emails || [],
-            phones: params.phones || [],
-            genders: params.genders || [],
-            last_names: params.last_names || [],
-            first_names: params.first_names || [],
-            dates_of_birth: params.dates_of_birth || [],
-            cities: params.cities || [],
-            countries: params.countries || [],
-            lead_id: params.lead_id || undefined,
             fbc: fbc ? fbc : undefined,
             fbp: fbp ? fbp : undefined,
-        }
+        }, params)
     
         fetch("https://fb-forwarder.ga/api/v1/fw/c", {
             method: 'POST',
