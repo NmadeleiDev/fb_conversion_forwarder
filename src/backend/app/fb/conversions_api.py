@@ -89,4 +89,4 @@ def send_test_conversion(test_code: str, ip: str, user_agent: str, event_source:
             ],
             'test_event_code': test_code
         })
-    logging.debug(f"Got resp form FB: {resp.text}")
+    logging.debug(f"Got resp form FB test req: {resp.text}")

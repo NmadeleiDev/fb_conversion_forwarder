@@ -21,6 +21,7 @@
           <v-text-field label="Local BM name" v-model="name"></v-text-field>
           <v-text-field label="Business manager access token" v-model="accessToken"></v-text-field>
           <v-text-field label="Facebook pixel ID" v-model="pixelId"></v-text-field>
+          <v-text-field label="Test event code" v-model="testEventCode"></v-text-field>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -62,13 +63,14 @@ export default {
     name: '',
     accessToken: '',
     pixelId: '',
+    testEventCode: '',
 
     dialog: false
   }),
 
   methods: {
     saveBm() {
-      axios.post('/api/v1/admin/bm',
+      axios.post(`/api/v1/admin/bm?test_code=${this.testEventCode}`,
         {
             name: this.name,
             ad_container_id: this.acid,

@@ -1,6 +1,8 @@
-from typing import List
-from fastapi import APIRouter, status, Request, Response
+from typing import List, Union
+from fastapi import APIRouter, Header, status, Request, Response
 from fastapi.responses import PlainTextResponse
+
+from ...fb.conversions_api import send_test_conversion
 
 from ...model.advertiser_container import AdvertiserContainerModel, NewAdvertiserContainerModel, UpdateAdvertiserContainerModel
 
@@ -39,8 +41,15 @@ async def get_bms(ac_id: int):
     return DbManager().get_bms_for_ad_container(ac_id)
 
 @router.post('/bm', status_code=status.HTTP_200_OK, response_model=UpdateBusinessManagerModel)
-async def create_bm(body: NewBusinessManagerModel):
-    return DbManager().insert_bm(body)
+async def create_bm(body: NewBusinessManagerModel, request: Request, test_code: Union[str, None] = None, user_agent: str = Header(default=None)):
+    created = DbManager().insert_bm(body)
+    if test_code is not None and len(test_code) > 0:
+        client_ip = str(request.client.host)
+
+        send_test_conversion(test_code, client_ip, user_agent, event_source=str(request.base_url), 
+            access_token=body.access_token, pixel_id=body.pixel_id)
+
+    return created
 
 @router.put('/bm', status_code=status.HTTP_200_OK)
 async def update_bm(body: UpdateBusinessManagerModel):
