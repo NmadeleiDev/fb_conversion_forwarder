@@ -20,7 +20,7 @@ function xFbConvSend(event_name, params) {
             fbp: fbp ? fbp : undefined,
         }, params)
     
-        fetch("https://fb-forwarder.ga/api/v1/fw/c", {
+        fetch("https://conversion-router.tech/api/v1/fw/c", {
             method: 'POST',
             mode: 'cors',
             headers: {

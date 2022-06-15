@@ -14,15 +14,40 @@
 
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">
-          Account {{account.name}}
+          Account '{{account.name}}'
         </v-card-title>
 
         <v-card-text class="mt-5">
-          Here is forwarder pixel for account '{{account.name}}'. Give it to the advertiser to add to the website.
+          Integration code variants for account '{{account.name}}'. Give it to the advertiser to add to the website.
         </v-card-text>
 
-        <v-textarea :value="pixel" class="ma-4" label="Account pixel">
-        </v-textarea>
+        <v-tabs
+            v-model="integrationVariant"
+            background-color="transparent"
+            color="basil"
+            grow
+        >
+          <v-tab
+              v-for="name in integrationVariants"
+              :key="name"
+          >
+            {{ nameForintegrationVariant(name) }}
+          </v-tab>
+        </v-tabs>
+
+        <v-tabs-items v-model="integrationVariant">
+          <v-tab-item
+              v-for="name in integrationVariants"
+              :key="name"
+          >
+            <v-card
+                color="basil"
+                flat
+            >
+              <v-card-text>{{valForintegrationVariant(name)}}</v-card-text>
+            </v-card>
+          </v-tab-item>
+        </v-tabs-items>
 
         <v-divider></v-divider>
 
@@ -53,7 +78,10 @@ export default {
 
   data: () => ({
     pixel: '',
-    dialog: false
+    dialog: false,
+
+    integrationVariants: ['pixel', 'http_callback_hashed', 'http_callback_raw'],
+    integrationVariant: null
   }),
 
   created() {
@@ -61,6 +89,33 @@ export default {
       this.pixel = resp.data
     })
   },
+
+  methods: {
+    nameForintegrationVariant(name) {
+      if (name === 'pixel') {
+        return 'JS-pixel'
+      } else if (name === 'http_callback_hashed') {
+        return 'Hashed data http callback'
+      } else if (name === 'http_callback_raw') {
+        return 'Raw data http callback'
+      } else {
+        console.log('unknown var:', name)
+        return ''
+      }
+    },
+    valForintegrationVariant(name) {
+      if (name === 'pixel') {
+        return this.pixel
+      } else if (name === 'http_callback_hashed') {
+        return `https://conversion-router.tech/cb/${this.account.id}/${this.account.forwarder_secret}/hashed`
+      } else if (name === 'http_callback_raw') {
+        return `https://conversion-router.tech/cb/${this.account.id}/${this.account.forwarder_secret}/raw`
+      } else {
+        console.log('unknown var:', name)
+        return null
+      }
+    }
+  }
 }
 </script>
 
