@@ -2,7 +2,7 @@ from typing import List, Union
 from fastapi import APIRouter, Header, status, Request, Response
 from fastapi.responses import PlainTextResponse
 
-from backend.app.model.conversion import SendConversionRequest
+from ...model.conversion import SendConversionRequest
 
 from ...fb.conversions_api import send_convesrion, send_test_conversion
 
