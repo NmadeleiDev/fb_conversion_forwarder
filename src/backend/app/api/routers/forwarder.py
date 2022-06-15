@@ -60,7 +60,7 @@ async def send_conversion_to_fb_s2s(request: Request,
     if lead_id is not None:
         kwargs['lead_id'] = lead_id
 
-    conversion = SendConversionRequest(event_name=event_name, **kwargs)
+    conversion = SendConversionRequest(event_name=event_name, **kwargs, auth_token='')
 
     bms = db.get_bms_for_ad_container(ac_id)
 

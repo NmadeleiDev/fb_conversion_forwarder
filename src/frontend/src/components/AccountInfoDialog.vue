@@ -107,9 +107,9 @@ export default {
       if (name === 'pixel') {
         return this.pixel
       } else if (name === 'http_callback_hashed') {
-        return `https://conversion-router.tech/cb/${this.account.id}/${this.account.forwarder_secret}/hashed`
+        return `https://conversion-router.tech/api/v1/fw/cb/${this.account.id}/${this.account.forwarder_secret}/hashed`
       } else if (name === 'http_callback_raw') {
-        return `https://conversion-router.tech/cb/${this.account.id}/${this.account.forwarder_secret}/raw`
+        return `https://conversion-router.tech/api/v1/fw/cb/${this.account.id}/${this.account.forwarder_secret}/raw`
       } else {
         console.log('unknown var:', name)
         return null
