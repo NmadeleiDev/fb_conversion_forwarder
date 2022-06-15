@@ -54,13 +54,16 @@ def send_convesrion(conversion: SendConversionRequest, ip: str, user_agent: str,
     TOKEN = access_token
 
     logging.debug(f'Sending conversion to fb with pixel_id={pixel_id}, access_token={access_token}: {conversion.dict()}')
-    logging.debug(f'ip={ip}, user_agent={user_agent}, event_source={event_source}')
+
+    req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source)
+
+    logging.debug(f'Request data: {req_data}')
 
     resp = requests.post(
         f'https://graph.facebook.com/{API_VERSION}/{PIXEL_ID}/events?access_token={TOKEN}',
         json={
             'data': [
-                create_fb_conversion_event_data(conversion, ip, user_agent, event_source)
+                req_data
             ]
         })
     logging.debug(f"Got resp form FB: {resp.json()}")
