@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 from facebook_business.adobjects.serverside.gender import Gender
 
 class SendConversionRequest(BaseModel):
-    event_name: str
     event_time: int = Field(default_factory=lambda : int(datetime.now().timestamp()))
 
     emails: List[str] = []

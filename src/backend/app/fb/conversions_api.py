@@ -10,6 +10,8 @@ from facebook_business.api import FacebookAdsApi
 from ..model.conversion import SendConversionRequest
 
 API_VERSION = FacebookAdsApi.API_VERSION
+FORWARDER_EVENT_NAME = 'forwarder_lead'
+
 
 def filter_str_for_subset(val: str, subset: set) -> str:
     return ''.join(filter(lambda x: x in subset, val))
@@ -38,7 +40,7 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
         user_data["lead_id"] = conversion.lead_id
 
     req_data = {
-                "event_name": conversion.event_name,
+                "event_name": FORWARDER_EVENT_NAME,
                 "event_time": conversion.event_time,
                 "action_source": "website",
                 "user_data": user_data,

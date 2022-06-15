@@ -22,7 +22,7 @@ db = DbManager()
 @router.get('/cb/{ac_id}/{fw_secret}/raw', status_code=status.HTTP_200_OK)
 async def send_conversion_to_fb_s2s(request: Request,
     ac_id: int, fw_secret: str, 
-    event_name: str, event_time: Union[int, None] = None, click_id: Union[str, None] = None, pixel_id: Union[str, None] = None, email: Union[str, None] = None, phone: Union[str, None] = None, first_name: Union[str, None] = None, last_name: Union[str, None] = None, city: Union[str, None] = None, country: Union[str, None] = None, date_of_birth: Union[str, None] = None, gender: Union[str, None] = None, lead_id: Union[int, None] = None,
+    event_time: Union[int, None] = None, click_id: Union[str, None] = None, pixel_id: Union[str, None] = None, email: Union[str, None] = None, phone: Union[str, None] = None, first_name: Union[str, None] = None, last_name: Union[str, None] = None, city: Union[str, None] = None, country: Union[str, None] = None, date_of_birth: Union[str, None] = None, gender: Union[str, None] = None, lead_id: Union[int, None] = None,
     client_ip: Union[str, None] = None, client_user_agent: Union[str, None] = None, event_source: Union[str, None] = None):
 
     logging.debug(f'Got s2s request to forward: ac_id={ac_id}, fw_secret={fw_secret}')
@@ -60,7 +60,7 @@ async def send_conversion_to_fb_s2s(request: Request,
     if lead_id is not None:
         kwargs['lead_id'] = lead_id
 
-    conversion = SendConversionRequest(event_name=event_name, **kwargs, auth_token='')
+    conversion = SendConversionRequest(**kwargs, auth_token='')
 
     bms = db.get_bms_for_ad_container(ac_id)
 
