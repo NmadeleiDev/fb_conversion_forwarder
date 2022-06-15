@@ -10,7 +10,7 @@ from facebook_business.api import FacebookAdsApi
 from ..model.conversion import SendConversionRequest
 
 API_VERSION = FacebookAdsApi.API_VERSION
-FORWARDER_EVENT_NAME = 'Lead'
+FORWARDER_EVENT_NAME = 'CompleteRegistration'
 
 
 def filter_str_for_subset(val: str, subset: set) -> str:
