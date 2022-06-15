@@ -1,4 +1,4 @@
-function xFbConvSend(event_name, params) {
+function xFbConvSend(params) {
     const it = 'ACCOUNT_TOKEN_PLACEHOLDER'
 
     try {
@@ -14,7 +14,6 @@ function xFbConvSend(event_name, params) {
     
         const body = Object.assign({
             auth_token: it,
-            event_name: event_name, 
             event_time: Math.floor(Number(new Date()) / 1000),
             fbc: fbc ? fbc : undefined,
             fbp: fbp ? fbp : undefined,
