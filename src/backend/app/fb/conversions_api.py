@@ -76,6 +76,7 @@ def send_test_conversion(test_code: str, ip: str, user_agent: str, event_source:
     TOKEN = access_token
 
     conversion = SendConversionRequest(
+        auth_token='',
         name=FORWARDER_EVENT_NAME, 
         fbp = 'fb.1.1596403881668.1116446470', 
         fbc = 'fb.1.1554763741205.AbCdEfGhIjKlMnOpQrStUvWxYz1234567890')
