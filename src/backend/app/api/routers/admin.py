@@ -48,7 +48,6 @@ async def create_bm(body: NewBusinessManagerModel, request: Request, test_code: 
     client_ip = str(request.client.host)
 
     if test_code is not None and len(test_code) > 0:
-
         send_test_conversion(test_code, client_ip, user_agent, event_source=str(request.base_url), 
             access_token=body.access_token, pixel_id=body.pixel_id)
         

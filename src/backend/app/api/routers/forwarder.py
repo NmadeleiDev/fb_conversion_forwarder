@@ -38,9 +38,9 @@ async def send_conversion_to_fb_s2s(request: Request,
     if event_time is not None:
         kwargs['event_time'] = event_time
     if click_id is not None:
-        kwargs['click_id'] = click_id
+        kwargs['fbc'] = click_id
     if pixel_id is not None:
-        kwargs['pixel_id'] = pixel_id
+        kwargs['fbp'] = pixel_id
     if email is not None:
         kwargs[f'{to_hash_fields_prefix}emails'] = [email]
     if phone is not None:
