@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union
 from fastapi import APIRouter, FastAPI, Header, Response, Request, status, UploadFile, File
 
@@ -38,7 +39,7 @@ async def send_conversion_to_fb_s2s(request: Request,
     if event_time is not None:
         kwargs['event_time'] = event_time
     if click_id is not None:
-        kwargs['fbc'] = click_id
+        kwargs['fbc'] = f'fb.1.{int(datetime.now().timestamp())}.{click_id}'
     if pixel_id is not None:
         kwargs['fbp'] = pixel_id
     if email is not None:
