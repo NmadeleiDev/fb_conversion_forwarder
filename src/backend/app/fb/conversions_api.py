@@ -44,9 +44,8 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
                 "event_time": conversion.event_time,
                 "action_source": "website",
                 "user_data": user_data,
+                "event_source_url": event_source
             }
-    if event_source:
-        req_data["event_source_url"] = event_source
 
     return req_data
 

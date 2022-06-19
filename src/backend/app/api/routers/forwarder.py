@@ -12,6 +12,9 @@ from ...fb import conversions_api
 
 from ...db.manager import DbManager
 
+EVENT_SOURCE_URL = ' https://funnel-end.site/'
+DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'
+
 router = APIRouter(
     prefix="/fw",
     tags=["Conversion forwarding"],
@@ -24,7 +27,8 @@ db = DbManager()
 async def send_conversion_to_fb_s2s(request: Request,
     ac_id: int, fw_secret: str, 
     event_time: Union[int, None] = None, click_id: Union[str, None] = None, pixel_id: Union[str, None] = None, email: Union[str, None] = None, phone: Union[str, None] = None, first_name: Union[str, None] = None, last_name: Union[str, None] = None, city: Union[str, None] = None, country: Union[str, None] = None, date_of_birth: Union[str, None] = None, gender: Union[str, None] = None, lead_id: Union[int, None] = None,
-    client_ip: Union[str, None] = None, client_user_agent: Union[str, None] = None, event_source: Union[str, None] = None):
+    client_ip: Union[str, None] = None, client_user_agent: Union[str, None] = None):
+
 
     logging.debug(f'Got s2s request to forward: ac_id={ac_id}, fw_secret={fw_secret}, click_id={click_id}')
 
@@ -67,12 +71,15 @@ async def send_conversion_to_fb_s2s(request: Request,
 
     logging.debug(f'ac auth success for ac_id={ac_id}')
 
+    if client_user_agent is None or len(client_user_agent) == 0:
+        client_user_agent = DEFAULT_USER_AGENT
+
     for bm in bms:
         conversions_api.send_convesrion(
             conversion=conversion, 
             ip=client_ip, 
             user_agent=client_user_agent, 
-            event_source=event_source,
+            event_source=EVENT_SOURCE_URL,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token
         )
@@ -102,7 +109,8 @@ async def send_conversion_to_fb_post(
             conversion=body, 
             ip=client_ip, 
             user_agent=user_agent, 
-            event_source=str(request.base_url),
+            # event_source=str(request.base_url),
+            event_source=EVENT_SOURCE_URL,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token
         )
@@ -132,7 +140,7 @@ async def send_test_conversion_to_fb(
             test_code=test_event_code,
             ip=client_ip, 
             user_agent=user_agent, 
-            event_source=str(request.base_url),
+            event_source=EVENT_SOURCE_URL,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token
         )
