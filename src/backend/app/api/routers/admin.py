@@ -2,6 +2,8 @@ from typing import List, Union
 from fastapi import APIRouter, Header, status, Request, Response
 from fastapi.responses import PlainTextResponse
 
+from ...model.server_exception import ServerException
+
 from ...model.conversion import SendConversionRequest
 
 from ...fb.conversions_api import send_convesrion, send_test_conversion
@@ -13,7 +15,7 @@ from .helpers.auth import CookieAuthMiddlewareRoute, remove_auth_cookie_from_res
 
 from ...db.manager import DbManager
 
-from ...model.bm import NewBusinessManagerModel, UpdateBusinessManagerModel
+from ...model.bm import NewBusinessManagerModel, UpdateBusinessManagerModel, UserDataFieldsEnum
 
 router = APIRouter(
     prefix="/admin",
@@ -38,6 +40,10 @@ async def delete_ac(ac_id: str):
     DbManager().delete_advertiser_conatiner(ac_id)
 
 
+@router.get('/bm/user-data-fields', status_code=status.HTTP_200_OK, response_model=List[str])
+async def get_availible_user_data_fields():
+    return [x.value for x in UserDataFieldsEnum]
+
 @router.get('/bm', status_code=status.HTTP_200_OK, response_model=List[UpdateBusinessManagerModel])
 async def get_bms(ac_id: int):
     return DbManager().get_bms_for_ad_container(ac_id)
@@ -47,11 +53,14 @@ async def create_bm(body: NewBusinessManagerModel, request: Request, test_code: 
     created = DbManager().insert_bm(body)
     client_ip = str(request.client.host)
 
-    if test_code is not None and len(test_code) > 0:
-        send_test_conversion(test_code, client_ip, user_agent, event_source=str(request.base_url), 
-            access_token=body.access_token, pixel_id=body.pixel_id)
-        
-    send_convesrion(SendConversionRequest(emails=['example@mail.com'], first_names=['Mary']), ip=client_ip, user_agent=user_agent, event_source=str(request.base_url), access_token=body.access_token, pixel_id=body.pixel_id)
+    try :
+        if test_code is not None and len(test_code) > 0:
+            send_test_conversion(test_code, client_ip, user_agent, event_source=str(request.base_url), 
+                access_token=body.access_token, pixel_id=body.pixel_id)
+            
+        send_convesrion(SendConversionRequest(emails=['example@mail.com'], first_names=['Mary']), ip=client_ip, user_agent=user_agent, event_source=str(request.base_url), access_token=body.access_token, pixel_id=body.pixel_id)
+    except Exception as e:
+        raise ServerException(message='Failed to send test conversion')
 
     return created
 

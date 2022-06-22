@@ -80,7 +80,7 @@ class DbManager():
 
     #CRUD BM
     def get_bms_for_ad_container(self, ac_id: int) -> List[UpdateBusinessManagerModel]:
-        query = f"""SELECT id, name, access_token, pixel_id FROM {self.bm_table_ref} WHERE ad_container_id = %s"""
+        query = f"""SELECT id, name, access_token, pixel_id, fields_sent FROM {self.bm_table_ref} WHERE ad_container_id = %s"""
 
         with self.conn.cursor() as curs:
             curs.execute(query, (ac_id,))
@@ -89,21 +89,21 @@ class DbManager():
                 id=x[0],
                 name=x[1], 
                 access_token=x[2],
-                pixel_id=x[3]) for x in curs.fetchall()]
+                pixel_id=x[3], fields_sent=x[4]) for x in curs.fetchall()]
 
     def insert_bm(self, bm: NewBusinessManagerModel) -> UpdateBusinessManagerModel:
-        query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id) VALUES (%s,%s,%s,%s) RETURNING id"""
+        query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id, fields_sent) VALUES (%s,%s,%s,%s,%s) RETURNING id"""
 
         with self.conn.cursor() as curs:
-            curs.execute(query, (bm.name, bm.ad_container_id, bm.access_token, bm.pixel_id))
+            curs.execute(query, (bm.name, bm.ad_container_id, bm.access_token, bm.pixel_id, bm.fields_sent))
             new_id = curs.fetchone()[0]
             return UpdateBusinessManagerModel(id=new_id, **bm.dict())
 
     def update_bm(self, bm: UpdateBusinessManagerModel):
-        query = f"""UPDATE {self.bm_table_ref} SET (name, access_token, pixel_id) = (%s,%s,%s) WHERE id = %s"""
+        query = f"""UPDATE {self.bm_table_ref} SET (name, access_token, pixel_id, fields_sent) = (%s,%s,%s,%s) WHERE id = %s"""
 
         with self.conn.cursor() as curs:
-            curs.execute(query, (bm.name, bm.access_token, bm.pixel_id, bm.id))
+            curs.execute(query, (bm.name, bm.access_token, bm.pixel_id, bm.fields_sent, bm.id))
 
     def delete_bm(self, bm_id: str):
         query = f"""DELETE FROM {self.bm_table_ref} WHERE id = %s"""

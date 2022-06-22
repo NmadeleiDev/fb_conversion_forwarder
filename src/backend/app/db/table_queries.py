@@ -22,6 +22,7 @@ create table if not exists {schema_name}.{business_managers_table}
 	name varchar default null,
 	access_token varchar not null,
 	pixel_id varchar not null,
+	fields_sent	varchar[] default '{{}}' not null,
 
 	CONSTRAINT fk_customer
       FOREIGN KEY(ad_container_id) 

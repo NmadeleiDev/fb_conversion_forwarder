@@ -18,9 +18,16 @@
         </v-card-title>
 
         <v-card-text class="mt-5">
+          <v-card-subtitle>BM settings</v-card-subtitle>
           <v-text-field label="Account name" v-model="bm.name"></v-text-field>
           <v-text-field label="Business manager access token" v-model="bm.access_token"></v-text-field>
           <v-text-field label="Facebook pixel ID" v-model="bm.pixel_id"></v-text-field>
+
+          <v-card-subtitle>Fields to send to Facebook API</v-card-subtitle>
+          <div class="d-flex flex-row flex-wrap">
+          <v-checkbox class="ml-5" v-for="field in userDataFieldsConst" :key="field"
+                      v-model="bm.fields_sent" :label="field" :value="field"></v-checkbox>
+          </div>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -58,8 +65,16 @@ export default {
   },
 
   data: () => ({
-    dialog: false
+    dialog: false,
+
+    userDataFieldsConst: [],
   }),
+
+  created() {
+    axios.get(`/api/v1/admin/bm/user-data-fields`).then((res) => {
+      this.userDataFieldsConst.push(...res.data)
+    })
+  },
 
   methods: {
     saveBm() {
@@ -70,6 +85,7 @@ export default {
             name: this.bm.name,
             access_token: this.bm.access_token,
             pixel_id: this.bm.pixel_id,
+            fields_sent: this.bm.fields_sent
           }).then((x) => {
         this.dialog = false
         this.emitChange()

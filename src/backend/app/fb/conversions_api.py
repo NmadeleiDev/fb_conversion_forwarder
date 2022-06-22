@@ -7,6 +7,8 @@ import logging
 
 from facebook_business.api import FacebookAdsApi
 
+from ..model.bm import UserDataFieldsEnum
+
 from ..model.conversion import SendConversionRequest
 
 API_VERSION = FacebookAdsApi.API_VERSION
@@ -19,25 +21,35 @@ def filter_str_for_subset(val: str, subset: set) -> str:
 def lower_and_hash(val: str) -> str:
     return sha256(val.lower().encode('utf-8')).hexdigest()
 
-def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, user_agent: str, event_source: str) -> dict:
-    user_data = {
-        "em": [lower_and_hash(x) for x in conversion.emails] + conversion.hash_emails,
-        "ph": [lower_and_hash(filter_str_for_subset(x, string.digits).lstrip('0')) for x in conversion.phones] + conversion.hash_phones,
-        "fbc": conversion.fbc,
-        "fbp": conversion.fbp,
-        # "ge": [x.value for x in conversion.genders],
-        # "db": [lower_and_hash(x) for x in conversion.dates_of_birth] + conversion.hash_dates_of_birth,
-        "ln": [lower_and_hash(x) for x in conversion.last_names] + conversion.hash_last_names,
-        "ct": [lower_and_hash(x) for x in conversion.cities] + conversion.hash_cities,
-        "fn": [lower_and_hash(x) for x in conversion.first_names] + conversion.hash_first_names,
-        "country": [lower_and_hash(x) for x in conversion.countries] + conversion.hash_countries,
-    }
-    if ip:
-        user_data["client_ip_address"] = ip
+def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, user_agent: str, event_source: str, bm_fields_sent: List[UserDataFieldsEnum]) -> dict:
+    user_data = {}
+    if UserDataFieldsEnum.fbc in bm_fields_sent:
+        user_data['fbc'] = conversion.fbc
+    if UserDataFieldsEnum.fbp in bm_fields_sent:
+        user_data['fbp'] = conversion.fbp
+    if UserDataFieldsEnum.emails in bm_fields_sent:
+        user_data['em'] = [lower_and_hash(x) for x in conversion.emails] + conversion.hash_emails
+    if UserDataFieldsEnum.phones in bm_fields_sent:
+        user_data['ph'] = [lower_and_hash(filter_str_for_subset(x, string.digits).lstrip('0')) for x in conversion.phones] + conversion.hash_phones
+    if UserDataFieldsEnum.last_names in bm_fields_sent:
+        user_data['ln'] = [lower_and_hash(x) for x in conversion.last_names] + conversion.hash_last_names
+    if UserDataFieldsEnum.first_names in bm_fields_sent:
+        user_data['fn'] = [lower_and_hash(x) for x in conversion.first_names] + conversion.hash_first_names
+    if UserDataFieldsEnum.cities in bm_fields_sent:
+        user_data['ct'] = [lower_and_hash(x) for x in conversion.cities] + conversion.hash_cities
+    if UserDataFieldsEnum.countries in bm_fields_sent:
+        user_data['country'] = [lower_and_hash(x) for x in conversion.countries] + conversion.hash_countries
+    if UserDataFieldsEnum.dates_of_birth in bm_fields_sent:
+        user_data['db'] = [lower_and_hash(x) for x in conversion.dates_of_birth] + conversion.hash_dates_of_birth
+    if UserDataFieldsEnum.genders in bm_fields_sent:
+        user_data['ge'] = [x.value for x in conversion.genders]
+    if UserDataFieldsEnum.lead_id in bm_fields_sent:
+        user_data['lead_id'] = conversion.lead_id
+    if UserDataFieldsEnum.client_ip_address in bm_fields_sent:
+        user_data['client_ip_address'] = ip
+
     if user_agent:
         user_data["client_user_agent"] = user_agent
-    if conversion.lead_id:
-        user_data["lead_id"] = conversion.lead_id
 
     req_data = {
                 "event_name": FORWARDER_EVENT_NAME,
@@ -50,13 +62,13 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
     return req_data
 
 def send_convesrion(conversion: SendConversionRequest, ip: str, user_agent: str, event_source: str, 
-                    pixel_id: str, access_token: str):
+                    pixel_id: str, access_token: str, bm_fields_sent: List[UserDataFieldsEnum]):
     PIXEL_ID = pixel_id
     TOKEN = access_token
 
     logging.debug(f'Sending conversion to fb with pixel_id={pixel_id}, access_token={access_token}: {conversion.dict()}')
 
-    req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source)
+    req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source, bm_fields_sent=bm_fields_sent)
 
     logging.debug(f'Request data: {req_data}')
 

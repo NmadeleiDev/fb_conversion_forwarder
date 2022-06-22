@@ -18,10 +18,17 @@
         </v-card-title>
 
         <v-card-text class="mt-5">
+          <v-card-subtitle>BM settings</v-card-subtitle>
           <v-text-field label="Local BM name" v-model="name"></v-text-field>
           <v-text-field label="Business manager access token" v-model="accessToken"></v-text-field>
           <v-text-field label="Facebook pixel ID" v-model="pixelId"></v-text-field>
           <v-text-field label="Test event code" v-model="testEventCode"></v-text-field>
+
+          <v-card-subtitle>Fields to send to Facebook API</v-card-subtitle>
+          <div class="d-flex flex-row flex-wrap">
+            <v-checkbox dense class="mr-5" v-for="field in userDataFieldsConst" :key="field"
+                        v-model="userDataFields" :label="field" :value="field"></v-checkbox>
+          </div>
         </v-card-text>
 
         <v-divider></v-divider>
@@ -64,9 +71,17 @@ export default {
     accessToken: '',
     pixelId: '',
     testEventCode: '',
+    userDataFields: [],
+    userDataFieldsConst: [],
 
     dialog: false
   }),
+
+  created() {
+    axios.get(`/api/v1/admin/bm/user-data-fields`).then((res) => {
+      this.userDataFieldsConst.push(...res.data)
+    })
+  },
 
   methods: {
     saveBm() {
@@ -76,6 +91,7 @@ export default {
             ad_container_id: this.acid,
             access_token: this.accessToken,
             pixel_id: this.pixelId,
+            fields_sent: this.userDataFields,
           })
           .then((x) => {
             this.dialog = false

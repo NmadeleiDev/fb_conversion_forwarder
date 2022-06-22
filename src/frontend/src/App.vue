@@ -16,6 +16,7 @@
 
     <v-main>
       <v-container>
+        <ServiceAlert :content="alertText" :val="showAlert"></ServiceAlert>
         <v-card v-if="isLogged">
           <v-card-title>
             Accounts
@@ -46,11 +47,13 @@ import NewAccountDialog from "@/components/NewAccountDialog";
 import LoginDialog from "@/components/LoginDialog";
 import CreateSystemAccountDialog from "@/components/CreateSystemAccountDialog";
 import AccountItem from "@/components/AccountItem";
+import ServiceAlert from "@/components/ServiceAlert";
 
 export default Vue.extend({
   name: 'App',
 
   components: {
+    ServiceAlert,
     AccountItem,
     CreateSystemAccountDialog,
     LoginDialog,
@@ -61,15 +64,28 @@ export default Vue.extend({
     accounts: [],
     accSearchStr: '',
 
-    isLogged: false
+    isLogged: false,
+
+    showAlert: false,
+    alertText: ''
   }),
 
   created() {
     this.checkIsLogged()
     this.reloadData()
+
+    axios.interceptors.response.use(resp => resp, (err) => {
+      this.showAlert = true
+      this.alertText = err.response.data.msg
+      console.log('err handled: ', err)
+      this.setTimeoutForAlert()
+    });
   },
 
   methods: {
+    setTimeoutForAlert() {
+      setTimeout(() => this.showAlert = false, 1000 * 5)
+    },
     reloadData() {
       while (this.accounts.length) {this.accounts.pop()}
       axios.get("/api/v1/admin/ac").then(resp => {

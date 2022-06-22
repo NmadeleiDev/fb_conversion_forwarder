@@ -30,5 +30,4 @@ class SendConversionRequest(BaseModel):
 
     lead_id: Union[int, None] = None
 
-
     auth_token: str = ''
