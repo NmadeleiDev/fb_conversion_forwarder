@@ -30,9 +30,9 @@ genders = ['m', 'f']
 
     
 def random_date_of_birth() -> str:
-    year = random.randint(1960, 2000)
-    month = random.randint(1, 12)
-    day = random.randint(1, 27)
+    year = str(random.randint(1960, 2000))
+    month = str(random.randint(1, 12)).rjust(2, '0')
+    day = str(random.randint(1, 27)).rjust(2, '0')
     return f'{year}{month}{day}'
 
 def random_email() -> str:
