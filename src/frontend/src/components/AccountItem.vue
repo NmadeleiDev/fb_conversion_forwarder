@@ -7,7 +7,12 @@
     <v-spacer></v-spacer>
     <v-list-item-action class="flex-row">
       <AccountInfoDialog v-on:data-change="emitChange" :account="account"></AccountInfoDialog>
-      <EditAccountDialog v-on:data-change="emitChange" :account="account"></EditAccountDialog>
+      <EditAccountDialog v-on:data-change="emitChange"
+                         :account="account"
+                         :fakeable-data-fields-const="fakeableDataFieldsConst"
+                         :user-data-fields-const="userDataFieldsConst"
+                         :domains="domains"
+      ></EditAccountDialog>
       <DeleteAccountDialog v-on:data-change="emitChange" :account="account"></DeleteAccountDialog>
     </v-list-item-action>
   </v-list-item>
@@ -23,7 +28,10 @@
     name: 'AccountItem',
     components: {DeleteAccountDialog, EditAccountDialog, AccountInfoDialog},
     props: {
-      account: Object
+      account: Object,
+      userDataFieldsConst: Array,
+      fakeableDataFieldsConst: Array,
+      domains: Array,
     },
 
     data: () => ({

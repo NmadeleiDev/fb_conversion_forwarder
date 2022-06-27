@@ -24,10 +24,18 @@
           <v-text-field label="Facebook pixel ID" v-model="pixelId"></v-text-field>
           <v-text-field label="Test event code" v-model="testEventCode"></v-text-field>
 
+          <v-select label="Event source domain" :items="domains.map(x => x.domain)" v-model="eventsourceDomain"></v-select>
+
           <v-card-subtitle>Fields to send to Facebook API</v-card-subtitle>
           <div class="d-flex flex-row flex-wrap">
             <v-checkbox dense class="mr-5" v-for="field in userDataFieldsConst" :key="field"
                         v-model="userDataFields" :label="field" :value="field"></v-checkbox>
+          </div>
+
+          <v-card-subtitle class="mt-3">Fields to random generate if not present</v-card-subtitle>
+          <div class="d-flex flex-row flex-wrap">
+            <v-checkbox dense class="mr-5" v-for="field in fakeableDataFieldsConst" :key="field"
+                        v-model="fakeableDataFields" :label="field" :value="field"></v-checkbox>
           </div>
         </v-card-text>
 
@@ -63,7 +71,10 @@ export default {
   name: "NewBmDialog",
 
   props: {
-    acid: String
+    acid: String,
+    userDataFieldsConst: Array,
+    fakeableDataFieldsConst: Array,
+    domains: Array
   },
 
   data: () => ({
@@ -71,17 +82,13 @@ export default {
     accessToken: '',
     pixelId: '',
     testEventCode: '',
+    eventsourceDomain: '',
     userDataFields: [],
-    userDataFieldsConst: [],
+
+    fakeableDataFields: [],
 
     dialog: false
   }),
-
-  created() {
-    axios.get(`/api/v1/admin/bm/user-data-fields`).then((res) => {
-      this.userDataFieldsConst.push(...res.data)
-    })
-  },
 
   methods: {
     saveBm() {
@@ -92,7 +99,9 @@ export default {
             access_token: this.accessToken,
             pixel_id: this.pixelId,
             fields_sent: this.userDataFields,
-          })
+            fields_generated: this.fakeableDataFields,
+            event_source_domain: this.eventsourceDomain
+        })
           .then((x) => {
             this.dialog = false
             this.emitChange()

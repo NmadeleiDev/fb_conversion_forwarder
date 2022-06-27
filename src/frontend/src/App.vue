@@ -10,6 +10,7 @@
       </div>
 
       <v-spacer></v-spacer>
+      <DomainsDialog :domains="domains"></DomainsDialog>
       <LoginDialog></LoginDialog>
       <CreateSystemAccountDialog v-if="isLogged"></CreateSystemAccountDialog>
     </v-app-bar>
@@ -31,7 +32,12 @@
           >
           </v-text-field>
           <v-list rounded>
-            <AccountItem v-on:data-change="reloadData" v-for="ac in filteredAccounts" :account="ac" :key="ac.id"></AccountItem>
+            <AccountItem v-on:data-change="reloadData" v-for="ac in filteredAccounts"
+                         :account="ac"
+                         :fakeable-data-fields-const="fakeableDataFieldsConst"
+                         :user-data-fields-const="userDataFieldsConst"
+                         :domains="domains"
+                         :key="ac.id"></AccountItem>
           </v-list>
         </v-card>
         <LoginDialog v-else></LoginDialog>
@@ -48,11 +54,13 @@ import LoginDialog from "@/components/LoginDialog";
 import CreateSystemAccountDialog from "@/components/CreateSystemAccountDialog";
 import AccountItem from "@/components/AccountItem";
 import ServiceAlert from "@/components/ServiceAlert";
+import DomainsDialog from "@/components/DomainsDialog";
 
 export default Vue.extend({
   name: 'App',
 
   components: {
+    DomainsDialog,
     ServiceAlert,
     AccountItem,
     CreateSystemAccountDialog,
@@ -67,7 +75,12 @@ export default Vue.extend({
     isLogged: false,
 
     showAlert: false,
-    alertText: ''
+    alertText: '',
+
+    userDataFieldsConst: [],
+    fakeableDataFieldsConst: [],
+
+    domains: []
   }),
 
   created() {
@@ -80,6 +93,18 @@ export default Vue.extend({
       console.log('err handled: ', err)
       this.setTimeoutForAlert()
     });
+
+    axios.get(`/api/v1/admin/bm/user-data-fields`).then((res) => {
+      this.userDataFieldsConst.push(...res.data)
+    })
+
+    axios.get(`/api/v1/admin/bm/fakeable-data-fields`).then((res) => {
+      this.fakeableDataFieldsConst.push(...res.data)
+    })
+
+    axios.get(`/api/v1/admin/domain`).then((res) => {
+      this.domains.push(...res.data)
+    })
   },
 
   methods: {

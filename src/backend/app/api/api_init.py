@@ -4,6 +4,8 @@ import fastapi
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from .static_server import add_static_handler
+
 from ..model.server_exception import ServerException
 from ..model.err_msg import ErrorMsgModel
 
@@ -22,6 +24,8 @@ def get_app() -> FastAPI:
         root_path="/api/v1",
         openapi_url="/api/v1/openapi.json"
     )
+
+    add_static_handler(app)
 
     app.include_router(router=admin.router)
     app.include_router(router=forwarder.router)

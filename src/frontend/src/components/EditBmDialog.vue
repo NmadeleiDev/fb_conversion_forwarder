@@ -23,10 +23,18 @@
           <v-text-field label="Business manager access token" v-model="bm.access_token"></v-text-field>
           <v-text-field label="Facebook pixel ID" v-model="bm.pixel_id"></v-text-field>
 
+          <v-select label="Event source domain" :items="domains.map(x => x.domain)" v-model="bm.event_source_domain"></v-select>
+
           <v-card-subtitle>Fields to send to Facebook API</v-card-subtitle>
           <div class="d-flex flex-row flex-wrap">
           <v-checkbox class="ml-5" v-for="field in userDataFieldsConst" :key="field"
                       v-model="bm.fields_sent" :label="field" :value="field"></v-checkbox>
+          </div>
+
+          <v-card-subtitle class="mt-3">Fields to random generate if not present</v-card-subtitle>
+          <div class="d-flex flex-row flex-wrap">
+            <v-checkbox class="ml-5" v-for="field in fakeableDataFieldsConst" :key="field"
+                        v-model="bm.fields_generated" :label="field" :value="field"></v-checkbox>
           </div>
         </v-card-text>
 
@@ -61,20 +69,15 @@ export default {
   name: "EditBmDialog",
 
   props: {
-    bm: Object
+    bm: Object,
+    userDataFieldsConst: Array,
+    fakeableDataFieldsConst: Array,
+    domains: Array
   },
 
   data: () => ({
     dialog: false,
-
-    userDataFieldsConst: [],
   }),
-
-  created() {
-    axios.get(`/api/v1/admin/bm/user-data-fields`).then((res) => {
-      this.userDataFieldsConst.push(...res.data)
-    })
-  },
 
   methods: {
     saveBm() {
@@ -85,7 +88,9 @@ export default {
             name: this.bm.name,
             access_token: this.bm.access_token,
             pixel_id: this.bm.pixel_id,
-            fields_sent: this.bm.fields_sent
+            fields_sent: this.bm.fields_sent,
+            fields_generated: this.bm.fields_generated,
+            event_source_domain: this.bm.event_source_domain
           }).then((x) => {
         this.dialog = false
         this.emitChange()

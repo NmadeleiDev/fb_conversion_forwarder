@@ -2,6 +2,7 @@ schema_name = "conversion_forwarder"
 business_managers_table = "business_manager"
 auth_table = "account"
 advertiser_container_table = "advertiser_container_table"
+domain_table = "event_source_domain"
 
 schema_create_query = f"""create schema if not exists {schema_name}"""
 
@@ -23,11 +24,23 @@ create table if not exists {schema_name}.{business_managers_table}
 	access_token varchar not null,
 	pixel_id varchar not null,
 	fields_sent	varchar[] default '{{}}' not null,
+	fields_generated varchar[] default '{{}}' not null,
+	event_source_domain varchar default '',
 
-	CONSTRAINT fk_customer
+	CONSTRAINT fk_ad_container_id
       FOREIGN KEY(ad_container_id) 
 	  	REFERENCES {schema_name}.{advertiser_container_table}(id)
 		ON DELETE CASCADE
+);
+"""
+
+domain_table_query = f"""
+create table if not exists {schema_name}.{domain_table}
+(
+	id serial PRIMARY KEY,
+	domain varchar not null,
+	fb_meta_tag varchar not null,
+	created_at timestamp default now() not null
 );
 """
 

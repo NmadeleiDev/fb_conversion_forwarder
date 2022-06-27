@@ -81,7 +81,7 @@ async def send_conversion_to_fb_s2s(request: Request,
             event_source=EVENT_SOURCE_URL,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token, 
-            bm_fields_sent=bm.fields_sent
+            bm=bm
         )
 
 @router.post('/c', status_code=status.HTTP_200_OK)
@@ -109,11 +109,10 @@ async def send_conversion_to_fb_post(
             conversion=body, 
             ip=client_ip, 
             user_agent=user_agent, 
-            # event_source=str(request.base_url),
             event_source=EVENT_SOURCE_URL,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token,
-            bm_fields_sent=bm.fields_sent
+            bm=bm
         )
 
 @router.post('/t', status_code=status.HTTP_200_OK)
@@ -143,5 +142,5 @@ async def send_test_conversion_to_fb(
             user_agent=user_agent, 
             event_source=EVENT_SOURCE_URL,
             pixel_id=bm.pixel_id, 
-            access_token=bm.access_token
+            access_token=bm.access_token,
         )

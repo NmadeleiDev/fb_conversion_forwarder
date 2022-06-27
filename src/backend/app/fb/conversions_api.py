@@ -4,12 +4,16 @@ import requests
 from hashlib import sha256
 import string
 import logging
+import random
 
 from facebook_business.api import FacebookAdsApi
 
-from ..model.bm import UserDataFieldsEnum
+from ..model.bm import BusinessManagerModel, FakeableDataFieldsEnum, UserDataFieldsEnum
 
 from ..model.conversion import SendConversionRequest
+from facebook_business.adobjects.serverside.gender import Gender
+
+from .sample_data import german_cities, german_names, german_surnames, genders, random_date_of_birth, random_email, random_phone_number
 
 API_VERSION = FacebookAdsApi.API_VERSION
 FORWARDER_EVENT_NAME = 'Lead'
@@ -20,6 +24,32 @@ def filter_str_for_subset(val: str, subset: set) -> str:
 
 def lower_and_hash(val: str) -> str:
     return sha256(val.lower().encode('utf-8')).hexdigest()
+
+def add_fake_data_to_conversion(conversion: SendConversionRequest, fields_to_fake: List[FakeableDataFieldsEnum]):
+    if FakeableDataFieldsEnum.cities in fields_to_fake and len(conversion.cities) == 0 and len(conversion.hash_cities) == 0:
+        conversion.cities = [random.choice(german_cities)]
+
+    if FakeableDataFieldsEnum.countries in fields_to_fake and len(conversion.countries) == 0 and len(conversion.hash_countries) == 0:
+        conversion.countries = 'de'
+
+    if FakeableDataFieldsEnum.dates_of_birth in fields_to_fake and len(conversion.dates_of_birth) == 0 and len(conversion.hash_dates_of_birth) == 0:
+        conversion.dates_of_birth = [random_date_of_birth()]
+
+    if FakeableDataFieldsEnum.emails in fields_to_fake and len(conversion.emails) == 0 and len(conversion.hash_emails) == 0:
+        conversion.emails = [random_email()]
+
+    if FakeableDataFieldsEnum.first_names in fields_to_fake and len(conversion.first_names) == 0 and len(conversion.hash_first_names) == 0:
+        conversion.first_names = [random.choice(german_names)]
+
+    if FakeableDataFieldsEnum.last_names in fields_to_fake and len(conversion.last_names) == 0 and len(conversion.hash_last_names) == 0:
+        conversion.last_names = [random.choice(german_surnames)]
+
+    if FakeableDataFieldsEnum.genders in fields_to_fake and len(conversion.genders) == 0:
+        conversion.genders = [random.choice([x for x in Gender])]
+    
+    if FakeableDataFieldsEnum.phones in fields_to_fake and len(conversion.phones) == 0 and len(conversion.hash_phones) == 0:
+        conversion.phones = [random_phone_number()]
+
 
 def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, user_agent: str, event_source: str, bm_fields_sent: List[UserDataFieldsEnum]) -> dict:
     user_data = {}
@@ -42,7 +72,7 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
     if UserDataFieldsEnum.dates_of_birth in bm_fields_sent:
         user_data['db'] = [lower_and_hash(x) for x in conversion.dates_of_birth] + conversion.hash_dates_of_birth
     if UserDataFieldsEnum.genders in bm_fields_sent:
-        user_data['ge'] = [x.value for x in conversion.genders]
+        user_data['ge'] = [lower_and_hash(x.value) for x in conversion.genders]
     if UserDataFieldsEnum.lead_id in bm_fields_sent:
         user_data['lead_id'] = conversion.lead_id
     if UserDataFieldsEnum.client_ip_address in bm_fields_sent:
@@ -62,13 +92,14 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
     return req_data
 
 def send_convesrion(conversion: SendConversionRequest, ip: str, user_agent: str, event_source: str, 
-                    pixel_id: str, access_token: str, bm_fields_sent: List[UserDataFieldsEnum]):
+                    pixel_id: str, access_token: str, bm: BusinessManagerModel):
     PIXEL_ID = pixel_id
     TOKEN = access_token
 
     logging.debug(f'Sending conversion to fb with pixel_id={pixel_id}, access_token={access_token}: {conversion.dict()}')
 
-    req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source, bm_fields_sent=bm_fields_sent)
+    add_fake_data_to_conversion(conversion, fields_to_fake=bm.fields_generated)
+    req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source, bm_fields_sent=bm.fields_sent)
 
     logging.debug(f'Request data: {req_data}')
 

@@ -39,7 +39,12 @@
                   class="mr-7"
               >
               </v-text-field>
-              <NewBmDialog v-on:data-change="emitChange" :acid="account.id"></NewBmDialog>
+              <NewBmDialog v-on:data-change="emitChange"
+                           :acid="account.id"
+                           :fakeable-data-fields-const="fakeableDataFieldsConst"
+                           :user-data-fields-const="userDataFieldsConst"
+                           :domains="domains"
+              ></NewBmDialog>
             </div>
           </div>
 
@@ -53,7 +58,12 @@
                 <v-list-item-subtitle>Pixel id: {{bm.pixel_id}}</v-list-item-subtitle>
               </v-list-item-content>
               <v-list-item-action>
-                <EditBmDialog v-on:data-change="emitChange" :bm="bm"></EditBmDialog>
+                <EditBmDialog v-on:data-change="emitChange"
+                              :bm="bm"
+                              :fakeable-data-fields-const="fakeableDataFieldsConst"
+                              :user-data-fields-const="userDataFieldsConst"
+                              :domains="domains"
+                ></EditBmDialog>
                 <DeleteBmDialog v-on:data-change="emitChange" :bm="bm"></DeleteBmDialog>
               </v-list-item-action>
             </v-list-item>
@@ -87,7 +97,11 @@ export default {
   name: "EditAccountDialog",
   components: {NewBmDialog, EditBmDialog, DeleteBmDialog},
   props: {
-    account: Object
+    account: Object,
+    userDataFieldsConst: Array,
+    fakeableDataFieldsConst: Array,
+
+    domains: Array
   },
 
   data: () => ({
