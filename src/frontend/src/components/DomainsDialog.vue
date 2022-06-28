@@ -5,9 +5,10 @@
         width="700"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text color="primary"
+        <v-btn text
                v-bind="attrs"
-               v-on="on"> Domains
+               v-on="on"> 
+          <span class="mr-2">Domains</span>
         </v-btn>
       </template>
 
