@@ -127,7 +127,7 @@ def send_test_conversion(test_code: str, ip: str, user_agent: str, event_source:
         f'https://graph.facebook.com/{API_VERSION}/{PIXEL_ID}/events?access_token={TOKEN}',
         json={
             'data': [
-                create_fb_conversion_event_data(conversion, ip, user_agent, event_source)
+                create_fb_conversion_event_data(conversion, ip, user_agent, event_source, [x.value for x in UserDataFieldsEnum])
             ],
             'test_event_code': test_code
         })

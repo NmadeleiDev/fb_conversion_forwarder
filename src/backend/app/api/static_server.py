@@ -1,6 +1,6 @@
 import logging
 from fastapi import FastAPI, Response, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from ..db.manager import DbManager
 
@@ -13,7 +13,11 @@ def add_static_handler(app: FastAPI):
 
         logging.debug(f'got domain: {request_domain}')
 
-        data = DbManager().get_domain(request_domain)
+        try:
+          data = DbManager().get_domain(request_domain)
+        except Exception as e:
+          logging.debug('error in get domain: ', e)
+          return PlainTextResponse('unknown domain')
 
         return HTMLResponse(content=f"""<!DOCTYPE html>
 <html lang="en">
