@@ -11,7 +11,7 @@ def add_static_handler(app: FastAPI):
     def return_static_page(request: Request):
         request_domain = request.base_url.hostname
 
-        logging.debug(f'got domain: {request_domain}, {request.base_url}')
+        logging.debug(f'got domain: {request_domain}')
 
         data = DbManager().get_domain(request_domain)
 
