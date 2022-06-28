@@ -10,7 +10,7 @@
       </div>
 
       <v-spacer></v-spacer>
-      <DomainsDialog :domains="domains"></DomainsDialog>
+      <DomainsDialog :domains="domains" v-on:data-change="reloadData"></DomainsDialog>
       <LoginDialog></LoginDialog>
       <CreateSystemAccountDialog v-if="isLogged"></CreateSystemAccountDialog>
     </v-app-bar>

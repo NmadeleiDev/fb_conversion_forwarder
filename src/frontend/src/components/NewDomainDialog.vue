@@ -5,10 +5,10 @@
         width="700"
     >
       <template v-slot:activator="{ on, attrs }">
-        <v-btn text color="primary"
+        <v-btn text
                v-bind="attrs"
                v-on="on">
-          Add Domain
+          <span class="mr-2">Add Domain</span>
         </v-btn>
       </template>
 
@@ -69,6 +69,7 @@ export default {
       }).then((res) => {
         console.log("res: ", res)
         this.emitChange()
+        this.dialog = false
       })
     },
     emitChange() {
