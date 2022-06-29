@@ -2,6 +2,8 @@ from datetime import datetime
 from typing import Union
 from fastapi import APIRouter, FastAPI, Header, Response, Request, status, UploadFile, File
 
+from ...tracker.api import get_fbclicd_and_pixel_id_by_click_id
+
 from ...model.err_msg import ErrorMsgModel
 from .helpers.auth import CookieAuthMiddlewareRoute
 import logging
@@ -26,8 +28,8 @@ db = DbManager()
 @router.get('/cb/{ac_id}/{fw_secret}/raw', status_code=status.HTTP_200_OK)
 async def send_conversion_to_fb_s2s(request: Request,
     ac_id: int, fw_secret: str, 
-    pixel_id: str = '',
-    event_time: Union[int, None] = None, click_id: Union[str, None] = None, fbp: Union[str, None] = None, email: Union[str, None] = None, phone: Union[str, None] = None, first_name: Union[str, None] = None, last_name: Union[str, None] = None, city: Union[str, None] = None, country: Union[str, None] = None, date_of_birth: Union[str, None] = None, gender: Union[str, None] = None, lead_id: Union[int, None] = None,
+    click_id: str = '',
+    event_time: Union[int, None] = None, fbp: Union[str, None] = None, email: Union[str, None] = None, phone: Union[str, None] = None, first_name: Union[str, None] = None, last_name: Union[str, None] = None, city: Union[str, None] = None, country: Union[str, None] = None, date_of_birth: Union[str, None] = None, gender: Union[str, None] = None, lead_id: Union[int, None] = None,
     client_ip: Union[str, None] = None, client_user_agent: Union[str, None] = None):
 
     logging.debug(f'Got s2s request to forward: ac_id={ac_id}, fw_secret={fw_secret}, click_id={click_id}')
@@ -39,11 +41,13 @@ async def send_conversion_to_fb_s2s(request: Request,
     if request.url.path.split('/')[-1] == 'hashed':
         to_hash_fields_prefix = 'hash_'
 
+    fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)
+
     kwargs = {}
     if event_time is not None:
         kwargs['event_time'] = event_time
     if click_id is not None:
-        kwargs['fbc'] = f'fb.1.{int(datetime.now().timestamp() * 1000)}.{click_id}'
+        kwargs['fbc'] = f'fb.1.{int(datetime.now().timestamp() * 1000)}.{fbclid}'
     if fbp is not None:
         kwargs['fbp'] = fbp
     if email is not None:
@@ -85,11 +89,11 @@ async def send_conversion_to_fb_s2s(request: Request,
             bm=bm
         )
 
-@router.post('/c/{pixel_id}', status_code=status.HTTP_200_OK)
+@router.post('/c/{click_id}', status_code=status.HTTP_200_OK)
 async def send_conversion_to_fb_post(
         request: Request, 
         body: SendConversionRequest, 
-        pixel_id: str = '',
+        click_id: str = '',
         user_agent: str = Header(default=None)):
 
     client_ip = str(request.client.host)
@@ -101,6 +105,10 @@ async def send_conversion_to_fb_post(
 
     if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
+
+    fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)
+    if not body.fbc:
+        body.fbc = f'fb.1.{int(datetime.now().timestamp() * 1000)}.{fbclid}'
 
     bms = db.get_bms_for_ad_container(ac_id, pixel_id)
 
@@ -117,12 +125,12 @@ async def send_conversion_to_fb_post(
             bm=bm
         )
 
-@router.post('/t/{pixel_id}', status_code=status.HTTP_200_OK)
+@router.post('/t/{click_id}', status_code=status.HTTP_200_OK)
 async def send_test_conversion_to_fb(
         request: Request, 
         test_event_code: str,
         auth_token: str,
-        pixel_id: str = '',
+        click_id: str = '',
         user_agent: str = Header(default=None)):
 
     client_ip = str(request.client.host)
@@ -133,6 +141,8 @@ async def send_test_conversion_to_fb(
 
     if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
+
+    fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)
 
     bms = db.get_bms_for_ad_container(ac_id, pixel_id)
 
