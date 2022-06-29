@@ -83,8 +83,8 @@ class DbManager():
     #CRUD BM
     def get_bms(self, ac_id=None, pixel_id=None) -> List[BusinessManagerModel]:
         query = f"""SELECT id, name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain FROM {self.bm_table_ref}"""
+        
         args = []
-
         filters = []
         if ac_id is not None:
             filters.append('ad_container_id = %s')

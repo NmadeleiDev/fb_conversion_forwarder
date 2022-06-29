@@ -16,7 +16,7 @@ def add_static_handler(app: FastAPI):
         try:
           data = DbManager().get_domain(request_domain)
         except Exception as e:
-          logging.debug('error in get domain: ', e)
+          logging.debug(f'domain {request_domain} not found')
           return PlainTextResponse('unknown domain')
 
         return HTMLResponse(content=f"""<!DOCTYPE html>
