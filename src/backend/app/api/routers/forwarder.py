@@ -69,7 +69,7 @@ async def send_conversion_to_fb_s2s(request: Request,
     bms = db.get_bms_for_ad_container(ac_id)
 
     logging.debug(f'ac auth success for ac_id={ac_id}')
-    logging.debug(f'Sending conversion to fb for bms ({", ".join([x.name for x in bms])}): {conversion.dict()}')
+    logging.debug(f'Sending conversion to fb for bms ({", ".join([f"(id={x.id} name={x.name} pixel_id={x.pixel_id})" for x in bms])}): {conversion.dict()}')
 
     if client_user_agent is None or len(client_user_agent) == 0:
         client_user_agent = DEFAULT_USER_AGENT
@@ -104,7 +104,7 @@ async def send_conversion_to_fb_post(
     bms = db.get_bms_for_ad_container(ac_id)
 
     logging.debug(f'ac auth success for ac_id={ac_id}')
-    logging.debug(f'Sending conversion to fb for bms ({", ".join([x.name for x in bms])}): {body.dict()}')
+    logging.debug(f'Sending conversion to fb for bms ({", ".join([f"(id={x.id} name={x.name} pixel_id={x.pixel_id})" for x in bms])}): {body.dict()}')
 
     for bm in bms:
         conversions_api.send_convesrion(
