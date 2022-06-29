@@ -1,4 +1,4 @@
-function xFbConvSend(pixel_id, params) {
+function xFbConvSend(click_id, params) {
     const it = 'ACCOUNT_TOKEN_PLACEHOLDER'
 
     try {
@@ -19,7 +19,7 @@ function xFbConvSend(pixel_id, params) {
             fbp: fbp ? fbp : undefined,
         }, params)
     
-        fetch(`https://conversion-router.tech/api/v1/fw/c/${pixel_id}`, {
+        fetch(`https://conversion-router.tech/api/v1/fw/c/${click_id}`, {
             method: 'POST',
             mode: 'cors',
             headers: {

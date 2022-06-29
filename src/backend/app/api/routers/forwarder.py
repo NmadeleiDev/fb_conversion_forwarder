@@ -46,7 +46,7 @@ async def send_conversion_to_fb_s2s(request: Request,
     kwargs = {}
     if event_time is not None:
         kwargs['event_time'] = event_time
-    if click_id is not None:
+    if fbclid is not None and fbclid != '':
         kwargs['fbc'] = f'fb.1.{int(datetime.now().timestamp() * 1000)}.{fbclid}'
     if fbp is not None:
         kwargs['fbp'] = fbp
