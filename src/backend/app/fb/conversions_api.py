@@ -96,12 +96,10 @@ def send_convesrion(conversion: SendConversionRequest, ip: str, user_agent: str,
     PIXEL_ID = pixel_id
     TOKEN = access_token
 
-    logging.debug(f'Sending conversion to fb with pixel_id={pixel_id}, access_token={access_token}: {conversion.dict()}')
-
     add_fake_data_to_conversion(conversion, fields_to_fake=bm.fields_generated)
     req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source, bm_fields_sent=bm.fields_sent, fields_to_fake=bm.fields_generated)
 
-    logging.debug(f'Request data: {req_data}')
+    logging.debug(f'Request data for pixel {PIXEL_ID}: {req_data}')
 
     resp = requests.post(
         f'https://graph.facebook.com/{API_VERSION}/{PIXEL_ID}/events?access_token={TOKEN}',
