@@ -52,7 +52,7 @@ async def get_fakeable_user_data_fields():
 
 @router.get('/bm', status_code=status.HTTP_200_OK, response_model=List[BusinessManagerModel])
 async def get_bms(ac_id: int):
-    return DbManager().get_bms_for_ad_container(ac_id)
+    return DbManager().get_bms(ac_id)
 
 @router.post('/bm', status_code=status.HTTP_200_OK, response_model=BusinessManagerModel)
 async def create_bm(body: NewBusinessManagerModel, request: Request, test_code: Union[str, None] = None, user_agent: str = Header(default=None)):

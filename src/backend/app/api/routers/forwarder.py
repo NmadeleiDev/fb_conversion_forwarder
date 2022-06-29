@@ -42,6 +42,7 @@ async def send_conversion_to_fb_s2s(request: Request,
         to_hash_fields_prefix = 'hash_'
 
     fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)
+    logging.debug()
 
     kwargs = {}
     if event_time is not None:
@@ -71,7 +72,7 @@ async def send_conversion_to_fb_s2s(request: Request,
 
     conversion = SendConversionRequest(**kwargs, auth_token='')
 
-    bms = db.get_bms_for_ad_container(ac_id, pixel_id)
+    bms = db.get_bms(ac_id, pixel_id)
 
     logging.debug(f'Got BMs for ac_id={ac_id}, pixel_id={pixel_id}\nSending conversion to fb for bms ({", ".join([f"(id={x.id} name={x.name} pixel_id={x.pixel_id})" for x in bms])}): {conversion.dict()}')
 
@@ -110,7 +111,7 @@ async def send_conversion_to_fb_post(
     if not body.fbc:
         body.fbc = f'fb.1.{int(datetime.now().timestamp() * 1000)}.{fbclid}'
 
-    bms = db.get_bms_for_ad_container(ac_id, pixel_id)
+    bms = db.get_bms(ac_id, pixel_id)
 
     logging.debug(f'ac auth success for ac_id={ac_id}\nSending conversion to fb for bms ({", ".join([f"(id={x.id} name={x.name} pixel_id={x.pixel_id})" for x in bms])}): {body.dict()}')
 
@@ -144,7 +145,7 @@ async def send_test_conversion_to_fb(
 
     fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)
 
-    bms = db.get_bms_for_ad_container(ac_id, pixel_id)
+    bms = db.get_bms(ac_id, pixel_id)
 
     logging.debug(f'ac auth success for ac_id={ac_id}')
 
