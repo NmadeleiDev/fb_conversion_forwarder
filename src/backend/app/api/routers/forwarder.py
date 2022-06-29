@@ -42,7 +42,6 @@ async def send_conversion_to_fb_s2s(request: Request,
         to_hash_fields_prefix = 'hash_'
 
     fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)
-    logging.debug()
 
     kwargs = {}
     if event_time is not None:

@@ -25,4 +25,7 @@ def get_fbclicd_and_pixel_id_by_click_id(click_id: str) -> Tuple[str, str, bool]
         logging.warn(f'Invalid data for url: {url}: {body}')
         return '', '', False
 
-    return data['token_9_value'], data['token_6_value'], True
+    fbclid, pixel_id = data['token_9_value'], data['token_6_value']
+    logging.debug(f'got fbclid={fbclid}, pixel_id={pixel_id}')
+
+    return fbclid, pixel_id, True
