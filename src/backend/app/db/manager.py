@@ -82,7 +82,7 @@ class DbManager():
 
     #CRUD BM
     def get_bms(self, ac_id=None, pixel_id=None) -> List[BusinessManagerModel]:
-        query = f"""SELECT id, name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain FROM {self.bm_table_ref}"""
+        query = f"""SELECT ad_container_id, id, name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain FROM {self.bm_table_ref}"""
         
         args = []
         filters = []
@@ -99,14 +99,14 @@ class DbManager():
         with self.conn.cursor() as curs:
             curs.execute(query, tuple(args))
             return [BusinessManagerModel(
-                ad_container_id=ac_id,
-                id=x[0],
-                name=x[1], 
-                access_token=x[2],
-                pixel_id=x[3], 
-                fields_sent=x[4], 
-                fields_generated=x[5],
-                event_source_domain=x[6]) for x in curs.fetchall()]
+                ad_container_id=[0],
+                id=x[1],
+                name=x[2], 
+                access_token=x[3],
+                pixel_id=x[4], 
+                fields_sent=x[5], 
+                fields_generated=x[6],
+                event_source_domain=x[7]) for x in curs.fetchall()]
 
     def insert_bm(self, bm: NewBusinessManagerModel) -> BusinessManagerModel:
         query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id, fields_sent, fields_generated, event_source_domain) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id"""
