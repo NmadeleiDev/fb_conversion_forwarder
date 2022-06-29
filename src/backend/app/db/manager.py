@@ -99,7 +99,7 @@ class DbManager():
         with self.conn.cursor() as curs:
             curs.execute(query, tuple(args))
             return [BusinessManagerModel(
-                ad_container_id=[0],
+                ad_container_id=int([0]),
                 id=x[1],
                 name=x[2], 
                 access_token=x[3],
