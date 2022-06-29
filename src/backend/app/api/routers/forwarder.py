@@ -26,7 +26,8 @@ db = DbManager()
 @router.get('/cb/{ac_id}/{fw_secret}/raw', status_code=status.HTTP_200_OK)
 async def send_conversion_to_fb_s2s(request: Request,
     ac_id: int, fw_secret: str, 
-    event_time: Union[int, None] = None, click_id: Union[str, None] = None, pixel_id: Union[str, None] = None, email: Union[str, None] = None, phone: Union[str, None] = None, first_name: Union[str, None] = None, last_name: Union[str, None] = None, city: Union[str, None] = None, country: Union[str, None] = None, date_of_birth: Union[str, None] = None, gender: Union[str, None] = None, lead_id: Union[int, None] = None,
+    pixel_id: str = '',
+    event_time: Union[int, None] = None, click_id: Union[str, None] = None, fbp: Union[str, None] = None, email: Union[str, None] = None, phone: Union[str, None] = None, first_name: Union[str, None] = None, last_name: Union[str, None] = None, city: Union[str, None] = None, country: Union[str, None] = None, date_of_birth: Union[str, None] = None, gender: Union[str, None] = None, lead_id: Union[int, None] = None,
     client_ip: Union[str, None] = None, client_user_agent: Union[str, None] = None):
 
     logging.debug(f'Got s2s request to forward: ac_id={ac_id}, fw_secret={fw_secret}, click_id={click_id}')
@@ -43,8 +44,8 @@ async def send_conversion_to_fb_s2s(request: Request,
         kwargs['event_time'] = event_time
     if click_id is not None:
         kwargs['fbc'] = f'fb.1.{int(datetime.now().timestamp() * 1000)}.{click_id}'
-    if pixel_id is not None:
-        kwargs['fbp'] = pixel_id
+    if fbp is not None:
+        kwargs['fbp'] = fbp
     if email is not None:
         kwargs[f'{to_hash_fields_prefix}emails'] = [email]
     if phone is not None:
@@ -66,9 +67,9 @@ async def send_conversion_to_fb_s2s(request: Request,
 
     conversion = SendConversionRequest(**kwargs, auth_token='')
 
-    bms = db.get_bms_for_ad_container(ac_id)
+    bms = db.get_bms_for_ad_container(ac_id, pixel_id)
 
-    logging.debug(f'ac auth success for ac_id={ac_id}\nSending conversion to fb for bms ({", ".join([f"(id={x.id} name={x.name} pixel_id={x.pixel_id})" for x in bms])}): {conversion.dict()}')
+    logging.debug(f'Got BMs for ac_id={ac_id}, pixel_id={pixel_id}\nSending conversion to fb for bms ({", ".join([f"(id={x.id} name={x.name} pixel_id={x.pixel_id})" for x in bms])}): {conversion.dict()}')
 
     if client_user_agent is None or len(client_user_agent) == 0:
         client_user_agent = DEFAULT_USER_AGENT
@@ -84,10 +85,11 @@ async def send_conversion_to_fb_s2s(request: Request,
             bm=bm
         )
 
-@router.post('/c', status_code=status.HTTP_200_OK)
+@router.post('/c/{pixel_id}', status_code=status.HTTP_200_OK)
 async def send_conversion_to_fb_post(
         request: Request, 
         body: SendConversionRequest, 
+        pixel_id: str = '',
         user_agent: str = Header(default=None)):
 
     client_ip = str(request.client.host)
@@ -100,7 +102,7 @@ async def send_conversion_to_fb_post(
     if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
 
-    bms = db.get_bms_for_ad_container(ac_id)
+    bms = db.get_bms_for_ad_container(ac_id, pixel_id)
 
     logging.debug(f'ac auth success for ac_id={ac_id}\nSending conversion to fb for bms ({", ".join([f"(id={x.id} name={x.name} pixel_id={x.pixel_id})" for x in bms])}): {body.dict()}')
 
@@ -115,11 +117,12 @@ async def send_conversion_to_fb_post(
             bm=bm
         )
 
-@router.post('/t', status_code=status.HTTP_200_OK)
+@router.post('/t/{pixel_id}', status_code=status.HTTP_200_OK)
 async def send_test_conversion_to_fb(
         request: Request, 
         test_event_code: str,
         auth_token: str,
+        pixel_id: str = '',
         user_agent: str = Header(default=None)):
 
     client_ip = str(request.client.host)
@@ -131,7 +134,7 @@ async def send_test_conversion_to_fb(
     if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
 
-    bms = db.get_bms_for_ad_container(ac_id)
+    bms = db.get_bms_for_ad_container(ac_id, pixel_id)
 
     logging.debug(f'ac auth success for ac_id={ac_id}')
 

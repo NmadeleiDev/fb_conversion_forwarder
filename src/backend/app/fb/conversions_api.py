@@ -79,7 +79,7 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
         user_data['client_ip_address'] = ip
 
     if user_agent:
-        user_data["client_user_agent"] = user_agent
+        user_data['client_user_agent'] = user_agent
 
     req_data = {
                 "event_name": FORWARDER_EVENT_NAME,

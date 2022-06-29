@@ -81,11 +81,15 @@ class DbManager():
             return curs.fetchone()[0]
 
     #CRUD BM
-    def get_bms_for_ad_container(self, ac_id: int) -> List[BusinessManagerModel]:
+    def get_bms_for_ad_container(self, ac_id: int, pixel_id=None) -> List[BusinessManagerModel]:
         query = f"""SELECT id, name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain FROM {self.bm_table_ref} WHERE ad_container_id = %s"""
+        args = [ac_id,]
+        if pixel_id is not None:
+            query += " AND pixel_id = %s"
+            args.append(pixel_id)
 
         with self.conn.cursor() as curs:
-            curs.execute(query, (ac_id,))
+            curs.execute(query, tuple(args))
             return [BusinessManagerModel(
                 ad_container_id=ac_id,
                 id=x[0],
