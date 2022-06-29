@@ -90,11 +90,11 @@ class DbManager():
             filters.append('ad_container_id = %s')
             args.append(ac_id)
         if pixel_id is not None:
-            query += "pixel_id = %s"
+            filters.append('pixel_id = %s')
             args.append(pixel_id)
 
         if len(filters) > 0:
-            query += ' WHERE ' + ' AND '.join(filters)
+            query += (' WHERE ' + ' AND '.join(filters))
 
         with self.conn.cursor() as curs:
             curs.execute(query, tuple(args))
