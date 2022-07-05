@@ -3,7 +3,7 @@ import logging
 import requests
 
 
-api_key = '66000001b0e76f5e27e94c2bfd4d8116a08cedb7'
+api_key = '1000001124b17498889f8f5ea62d0bc7186e14e'
 
 def get_fbclicd_and_pixel_id_by_click_id(click_id: str) -> Tuple[str, str, bool]:
     url = f'http://traffictop.online/arm.php?api_key={api_key}&action=clickinfo@get&clickid={click_id}'

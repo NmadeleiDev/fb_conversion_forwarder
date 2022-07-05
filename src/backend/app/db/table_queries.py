@@ -50,7 +50,8 @@ create table if not exists {schema_name}.{auth_table}
 	id serial PRIMARY KEY,
 	email varchar not null,
 	password varchar not null,
-	token varchar default null
+	token varchar default null,
+	binom_api_key varchar default null
 );
 """
 
