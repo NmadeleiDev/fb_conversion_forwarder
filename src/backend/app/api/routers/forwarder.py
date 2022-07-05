@@ -98,7 +98,7 @@ async def send_conversion_to_fb_post(
 
     client_ip = str(request.client.host)
 
-    logging.debug(f'Got request to forward: auth_token={body.auth_token}')
+    logging.debug(f'Got request to forward: auth_token={body.auth_token}, click_id={click_id}')
     parts = body.auth_token.split('.')
     ac_id = parts[0]
     fw_secret = parts[1]
