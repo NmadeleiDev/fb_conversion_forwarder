@@ -18,15 +18,11 @@ function xFbConvSend(click_id, params) {
             fbc: fbc ? fbc : undefined,
             fbp: fbp ? fbp : undefined,
         }, params)
-    
-        fetch(`https://conversion-router.tech/api/v1/fw/c/${click_id}`, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body)
-        }).then(x => console.log(x));
+
+        let xhr = new XMLHttpRequest()
+        xhr.open('POST', `https://conversion-router.tech/api/v1/fw/c/${click_id}`, false)
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(body))
     } catch (e) {
         console.log(e)
     }

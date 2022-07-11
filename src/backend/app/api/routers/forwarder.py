@@ -100,6 +100,8 @@ async def send_conversion_to_fb_post(
 
     logging.debug(f'Got request to forward: auth_token={body.auth_token}, click_id={click_id}')
     parts = body.auth_token.split('.')
+    if len(parts) != 2:
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
     ac_id = parts[0]
     fw_secret = parts[1]
 
@@ -136,6 +138,8 @@ async def send_test_conversion_to_fb(
     client_ip = str(request.client.host)
 
     parts = auth_token.split('.')
+    if len(parts) != 2:
+        return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
     ac_id = parts[0]
     fw_secret = parts[1]
 
