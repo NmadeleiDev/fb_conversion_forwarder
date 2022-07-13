@@ -25,6 +25,8 @@
 
           <v-select label="Event source domain" :items="domains.map(x => x.domain)" v-model="bm.event_source_domain"></v-select>
 
+          <v-select label="Facebook event name" :items="fbEventNames" v-model="bm.fb_event_name"></v-select>
+
           <v-card-subtitle>Fields to send to Facebook API</v-card-subtitle>
           <div class="d-flex flex-row flex-wrap">
           <v-checkbox class="ml-5" v-for="field in userDataFieldsConst" :key="field"
@@ -77,6 +79,15 @@ export default {
 
   data: () => ({
     dialog: false,
+
+    fbEventNames: [
+      'Lead',
+      'PageView',
+      'CompleteRegistration',
+      'Purchase',
+      'Search',
+      'ViewContent'
+    ]
   }),
 
   methods: {
@@ -90,7 +101,8 @@ export default {
             pixel_id: this.bm.pixel_id,
             fields_sent: this.bm.fields_sent,
             fields_generated: this.bm.fields_generated,
-            event_source_domain: this.bm.event_source_domain
+            event_source_domain: this.bm.event_source_domain,
+            fb_event_name: this.bm.fb_event_name
           }).then((x) => {
         this.dialog = false
         this.emitChange()

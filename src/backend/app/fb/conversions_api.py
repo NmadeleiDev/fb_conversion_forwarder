@@ -51,7 +51,7 @@ def add_fake_data_to_conversion(conversion: SendConversionRequest, fields_to_fak
         conversion.phones = [random_phone_number()]
 
 
-def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, user_agent: str, event_source: str, bm_fields_sent: List[UserDataFieldsEnum], fields_to_fake: List[FakeableDataFieldsEnum] = []) -> dict:
+def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, user_agent: str, event_source: str, bm_fields_sent: List[UserDataFieldsEnum], fields_to_fake: List[FakeableDataFieldsEnum] = [], fb_event_name=FORWARDER_EVENT_NAME) -> dict:
     user_data = {}
     if UserDataFieldsEnum.fbc in (bm_fields_sent + fields_to_fake):
         user_data['fbc'] = conversion.fbc
@@ -82,7 +82,7 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
         user_data['client_user_agent'] = user_agent
 
     req_data = {
-                "event_name": FORWARDER_EVENT_NAME,
+                "event_name": fb_event_name,
                 "event_time": conversion.event_time,
                 "action_source": "website",
                 "user_data": user_data,
@@ -97,7 +97,7 @@ def send_convesrion(conversion: SendConversionRequest, ip: str, user_agent: str,
     TOKEN = access_token
 
     add_fake_data_to_conversion(conversion, fields_to_fake=bm.fields_generated)
-    req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source, bm_fields_sent=bm.fields_sent, fields_to_fake=bm.fields_generated)
+    req_data = create_fb_conversion_event_data(conversion, ip, user_agent, event_source, bm_fields_sent=bm.fields_sent, fields_to_fake=bm.fields_generated, fb_event_name=bm.fb_event_name)
 
     logging.debug(f'Request data for pixel {PIXEL_ID}: {req_data}')
 

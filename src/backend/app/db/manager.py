@@ -82,7 +82,7 @@ class DbManager():
 
     #CRUD BM
     def get_bms(self, ac_id=None, pixel_id=None) -> List[BusinessManagerModel]:
-        query = f"""SELECT ad_container_id, id, name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain FROM {self.bm_table_ref}"""
+        query = f"""SELECT ad_container_id, id, name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain, fb_event_name FROM {self.bm_table_ref}"""
         
         args = []
         filters = []
@@ -106,21 +106,22 @@ class DbManager():
                 pixel_id=x[4], 
                 fields_sent=x[5], 
                 fields_generated=x[6],
-                event_source_domain=x[7]) for x in curs.fetchall()]
+                event_source_domain=x[7],
+                fb_event_name=x[8]) for x in curs.fetchall()]
 
     def insert_bm(self, bm: NewBusinessManagerModel) -> BusinessManagerModel:
-        query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id, fields_sent, fields_generated, event_source_domain) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id"""
+        query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id, fields_sent, fields_generated, event_source_domain, fb_event_name) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id"""
 
         with self.conn.cursor() as curs:
-            curs.execute(query, (bm.name, bm.ad_container_id, bm.access_token, bm.pixel_id, bm.fields_sent, bm.fields_generated, bm.event_source_domain))
+            curs.execute(query, (bm.name, bm.ad_container_id, bm.access_token, bm.pixel_id, bm.fields_sent, bm.fields_generated, bm.event_source_domain, bm.fb_event_name))
             new_id = curs.fetchone()[0]
             return BusinessManagerModel(id=new_id, **bm.dict())
 
     def update_bm(self, bm: BusinessManagerModel):
-        query = f"""UPDATE {self.bm_table_ref} SET (name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain) = (%s,%s,%s,%s,%s,%s) WHERE id = %s"""
+        query = f"""UPDATE {self.bm_table_ref} SET (name, access_token, pixel_id, fields_sent, fields_generated, event_source_domain, fb_event_name) = (%s,%s,%s,%s,%s,%s,%s) WHERE id = %s"""
 
         with self.conn.cursor() as curs:
-            curs.execute(query, (bm.name, bm.access_token, bm.pixel_id, bm.fields_sent, bm.fields_generated, bm.event_source_domain, bm.id))
+            curs.execute(query, (bm.name, bm.access_token, bm.pixel_id, bm.fields_sent, bm.fields_generated, bm.event_source_domain, bm.fb_event_name, bm.id))
 
     def delete_bm(self, bm_id: str):
         query = f"""DELETE FROM {self.bm_table_ref} WHERE id = %s"""

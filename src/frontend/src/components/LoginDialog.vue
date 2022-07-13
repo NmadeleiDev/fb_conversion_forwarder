@@ -21,7 +21,7 @@
 
         <v-card-text class="mt-5">
           <v-text-field label="Email" v-model="email"></v-text-field>
-          <v-text-field label="Password" v-model="password"></v-text-field>
+          <v-text-field label="Password" type="password" v-model="password"></v-text-field>
         </v-card-text>
 
         <v-divider></v-divider>

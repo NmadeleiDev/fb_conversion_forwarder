@@ -26,6 +26,8 @@
 
           <v-select label="Event source domain" :items="domains.map(x => x.domain)" v-model="eventsourceDomain"></v-select>
 
+          <v-select label="Facebook event name" :items="fbEventNames" v-model="fbEventName"></v-select>
+
           <v-card-subtitle>Fields to send to Facebook API</v-card-subtitle>
           <div class="d-flex flex-row flex-wrap">
             <v-checkbox dense class="mr-5" v-for="field in userDataFieldsConst" :key="field"
@@ -84,10 +86,19 @@ export default {
     testEventCode: '',
     eventsourceDomain: '',
     userDataFields: [],
-
     fakeableDataFields: [],
+    fbEventName: 'Lead',
 
-    dialog: false
+    dialog: false,
+
+    fbEventNames: [
+      'Lead',
+      'PageView',
+      'CompleteRegistration',
+      'Purchase',
+      'Search',
+      'ViewContent'
+    ]
   }),
 
   methods: {
@@ -100,7 +111,8 @@ export default {
             pixel_id: this.pixelId,
             fields_sent: this.userDataFields,
             fields_generated: this.fakeableDataFields,
-            event_source_domain: this.eventsourceDomain
+            event_source_domain: this.eventsourceDomain,
+            fb_event_name: this.fbEventName,
         })
           .then((x) => {
             this.dialog = false

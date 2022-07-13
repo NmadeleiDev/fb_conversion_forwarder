@@ -38,6 +38,7 @@ class NewBusinessManagerModel(BaseModel):
     fields_sent: List[UserDataFieldsEnum]
     fields_generated: List[FakeableDataFieldsEnum]
     event_source_domain: str = ''
+    fb_event_name: str = 'Lead'
 
 class BusinessManagerModel(NewBusinessManagerModel):
     id: str
