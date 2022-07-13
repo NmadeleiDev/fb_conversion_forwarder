@@ -26,6 +26,7 @@ create table if not exists {schema_name}.{business_managers_table}
 	fields_sent	varchar[] default '{{}}' not null,
 	fields_generated varchar[] default '{{}}' not null,
 	event_source_domain varchar default '',
+	fb_event_name varchar default 'Lead',
 
 	CONSTRAINT fk_ad_container_id
       FOREIGN KEY(ad_container_id) 
@@ -50,8 +51,7 @@ create table if not exists {schema_name}.{auth_table}
 	id serial PRIMARY KEY,
 	email varchar not null,
 	password varchar not null,
-	token varchar default null,
-	binom_api_key varchar default null
+	token varchar default null
 );
 """
 

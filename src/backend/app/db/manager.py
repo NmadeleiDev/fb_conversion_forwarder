@@ -110,7 +110,7 @@ class DbManager():
                 fb_event_name=x[8]) for x in curs.fetchall()]
 
     def insert_bm(self, bm: NewBusinessManagerModel) -> BusinessManagerModel:
-        query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id, fields_sent, fields_generated, event_source_domain, fb_event_name) VALUES (%s,%s,%s,%s,%s,%s,%s) RETURNING id"""
+        query = f"""INSERT INTO {self.bm_table_ref} (name, ad_container_id, access_token, pixel_id, fields_sent, fields_generated, event_source_domain, fb_event_name) VALUES (%s,%s,%s,%s,%s,%s,%s,%s) RETURNING id"""
 
         with self.conn.cursor() as curs:
             curs.execute(query, (bm.name, bm.ad_container_id, bm.access_token, bm.pixel_id, bm.fields_sent, bm.fields_generated, bm.event_source_domain, bm.fb_event_name))
