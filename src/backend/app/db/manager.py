@@ -73,7 +73,7 @@ class DbManager():
         with self.conn.cursor() as curs:
             curs.execute(query, (ac_id, ))
 
-    def get_advertiser_conatiner_forwarder_secret(self, ac_id: str) -> str:
+    def get_advertiser_container_forwarder_secret(self, ac_id: str) -> str:
         query = f"""SELECT forwarder_secret FROM {self.advertiser_container_table_ref} WHERE id = %s"""
 
         with self.conn.cursor() as curs:

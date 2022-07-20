@@ -34,7 +34,7 @@ async def send_conversion_to_fb_s2s(request: Request,
 
     logging.debug(f'Got s2s request to forward: ac_id={ac_id}, fw_secret={fw_secret}, click_id={click_id}')
 
-    if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
+    if db.get_advertiser_container_forwarder_secret(ac_id) != fw_secret:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
 
     to_hash_fields_prefix = ''
@@ -105,11 +105,15 @@ async def send_conversion_to_fb_post(
     ac_id = parts[0]
     fw_secret = parts[1]
 
-    if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
+    if db.get_advertiser_container_forwarder_secret(ac_id) != fw_secret:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
 
     fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)
-    if not body.fbc:
+    if not ok:
+        logging.warn(f'Failed to get fbclid from click_id={click_id}, body: {body}')
+        return
+
+    if ok and (not body.fbc or body.fbc == ''):
         body.fbc = f'fb.1.{int(datetime.now().timestamp() * 1000)}.{fbclid}'
 
     bms = db.get_bms(pixel_id=pixel_id)
@@ -143,7 +147,7 @@ async def send_test_conversion_to_fb(
     ac_id = parts[0]
     fw_secret = parts[1]
 
-    if db.get_advertiser_conatiner_forwarder_secret(ac_id) != fw_secret:
+    if db.get_advertiser_container_forwarder_secret(ac_id) != fw_secret:
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=ErrorMsgModel(msg='secret incorrect').dict())
 
     fbclid, pixel_id, ok = get_fbclicd_and_pixel_id_by_click_id(click_id)

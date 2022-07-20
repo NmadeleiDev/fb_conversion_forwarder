@@ -111,7 +111,7 @@ async def delete_this_account(request: Request, response: Response):
 
 @router.get('/pixel', status_code=status.HTTP_200_OK, response_class=PlainTextResponse)
 async def get_forwarder_pixel_script(ac_id: str):
-    secret = DbManager().get_advertiser_conatiner_forwarder_secret(ac_id)
+    secret = DbManager().get_advertiser_container_forwarder_secret(ac_id)
 
     with open('pixel_script.js', 'r') as f:
         cont = f.read()
