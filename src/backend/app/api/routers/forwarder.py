@@ -14,7 +14,6 @@ from ...fb import conversions_api
 
 from ...db.manager import DbManager
 
-EVENT_SOURCE_URL = ' https://funnel-end.site/'
 DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36'
 
 router = APIRouter(
@@ -83,7 +82,7 @@ async def send_conversion_to_fb_s2s(request: Request,
             conversion=conversion, 
             ip=client_ip, 
             user_agent=client_user_agent, 
-            event_source=EVENT_SOURCE_URL,
+            event_source=bm.event_source_domain,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token, 
             bm=bm
@@ -125,7 +124,7 @@ async def send_conversion_to_fb_post(
             conversion=body, 
             ip=client_ip, 
             user_agent=user_agent, 
-            event_source=EVENT_SOURCE_URL,
+            event_source=bm.event_source_domain,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token,
             bm=bm
@@ -161,7 +160,7 @@ async def send_test_conversion_to_fb(
             test_code=test_event_code,
             ip=client_ip, 
             user_agent=user_agent, 
-            event_source=EVENT_SOURCE_URL,
+            event_source=bm.event_source_domain,
             pixel_id=bm.pixel_id, 
             access_token=bm.access_token,
         )
