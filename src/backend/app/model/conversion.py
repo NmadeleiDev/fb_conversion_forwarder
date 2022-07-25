@@ -29,5 +29,6 @@ class SendConversionRequest(BaseModel):
     fbp: Union[str, None] = None
 
     lead_id: Union[int, None] = None
+    clickid: Union[str, None] = None
 
     auth_token: str = ''
