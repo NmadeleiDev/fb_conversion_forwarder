@@ -78,8 +78,8 @@ def create_fb_conversion_event_data(conversion: SendConversionRequest, ip: str, 
     if UserDataFieldsEnum.client_ip_address in (bm_fields_sent + fields_to_fake):
         user_data['client_ip_address'] = ip
 
-    if conversion.clickid is not None:
-        user_data['external_id'] = conversion.clickid
+    # if conversion.clickid is not None:
+    #     user_data['external_id'] = conversion.clickid
 
     if user_agent:
         user_data['client_user_agent'] = user_agent
